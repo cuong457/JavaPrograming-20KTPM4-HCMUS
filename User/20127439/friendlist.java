@@ -43,7 +43,7 @@ public class friendlist extends JFrame implements ActionListener {
 
     public void initComponents(){
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+        //init
         headerLabel = new JLabel("Friend");
         usernameLabel = new JLabel("Your username");
         addfriendLabel = new JLabel("Add friend by username");
@@ -62,6 +62,7 @@ public class friendlist extends JFrame implements ActionListener {
         firendList = new JList<>(demoFriend);
         friendScrollPane = new JScrollPane(firendList);
 
+        //set font
         headerLabel.setFont(new Font("Arial", Font.PLAIN, 28));
         usernameLabel.setFont(new Font("Arial", Font.PLAIN, 20));
         addfriendLabel.setFont(new Font("Arial", Font.PLAIN, 20));
@@ -73,6 +74,7 @@ public class friendlist extends JFrame implements ActionListener {
         unfriendBtn.setFont(new Font("Arial", Font.BOLD, 18));
         firendList.setFont(new Font("Arial", Font.PLAIN, 18));
 
+        //add to frame
         add(headerLabel);
         add(usernameLabel);
         add(addfriendLabel);
@@ -85,9 +87,20 @@ public class friendlist extends JFrame implements ActionListener {
         add(firendList);
         add(friendScrollPane);
         
-        // add(loginBtn);
-        // add(signupBtn);
+        //set color
+        addfriendBtn.setBackground(new Color(103,201,250));
+        addfriendBtn.setOpaque(true);
 
+        unfriendBtn.setBackground(new Color(255,84,84));
+        unfriendBtn.setOpaque(true);
+
+        firendList.setBackground(new Color(246, 250, 142));
+        firendList.setOpaque(true);
+
+        //set scrollpane
+        friendScrollPane.setViewportView(firendList);
+
+        //set size and location
         headerLabel.setBounds(leftx, lefty, 300, 60);
         usernameLabel.setBounds(rightx, righty, 300, 40);
         addfriendLabel.setBounds(rightx, righty + step*3, 300, 40);
@@ -97,24 +110,20 @@ public class friendlist extends JFrame implements ActionListener {
         addfriendField.setBounds(rightx, righty + step*4, 300, 40);
         unfriendField.setBounds(rightx, righty + step*8, 300, 40);
 
-        addfriendBtn.setBackground(new Color(103,201,250));
-        addfriendBtn.setOpaque(true);
         addfriendBtn.setBounds(rightx, righty + step*5, 300, 40);
+        unfriendBtn.setBounds(rightx, righty + step*9, 300, 40);
         
-        unfriendBtn.setBackground(new Color(255,84,84));
-        unfriendBtn.setOpaque(true);
-        unfriendBtn.setBounds(rightx, righty += step*9, 300, 40);
+        friendScrollPane.setBounds(leftx , lefty + 60, 300, 560);
 
+        firendList.setBounds(leftx, lefty + 60, 300, 560);
 
-        firendList.setSelectedIndex(2);
-        
-        firendList.setBackground(Color.YELLOW);
-        firendList.setOpaque(true);
-        firendList.setBounds(leftx, lefty += 60, 300, 560);
-
+        //set text field enabled
         usernameField.setEnabled(false);
+
+        //just for demo
         usernameField.setText("demo");
 
+        //set main frame
         setTitle("Friend list");
         setSize(720, 720);
         setLayout(null);
