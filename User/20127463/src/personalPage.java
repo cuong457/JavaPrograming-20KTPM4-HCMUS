@@ -1,3 +1,4 @@
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -68,9 +69,9 @@ public class personalPage implements ActionListener {
         usn.setBounds(new Rectangle(new Point(20, 290), usn.getPreferredSize()));
 
         // Create some function button
-        ImageIcon historyIcon = new ImageIcon(imgConfig.ScaleImage(imgConfig.imgLoading("./assets/icons/history.png"), 50/3, 50/3));
-        ImageIcon banIcon = new ImageIcon(imgConfig.ScaleImage(imgConfig.imgLoading("./assets/icons/ban.png"), 50/3, 50/3));
-        ImageIcon penIcon = new ImageIcon(imgConfig.ScaleImage(imgConfig.imgLoading("./assets/icons/pen.png"), 50/3, 50/3));
+        ImageIcon historyIcon = new ImageIcon(imgConfig.ScaleImage(imgConfig.imgLoading("./src/assets/icons/history.png"), 50/3, 50/3));
+        ImageIcon banIcon = new ImageIcon(imgConfig.ScaleImage(imgConfig.imgLoading("./src/assets/icons/ban.png"), 50/3, 50/3));
+        ImageIcon penIcon = new ImageIcon(imgConfig.ScaleImage(imgConfig.imgLoading("./src/assets/icons/pen.png"), 50/3, 50/3));
 
         JButton seeLoginHistoryBtn = new JButton(historyIcon);
         seeLoginHistoryBtn.setActionCommand("see_login_history");
@@ -200,7 +201,7 @@ public class personalPage implements ActionListener {
             usrPage.popupView();
         }
         else if(comStr.indexOf("see_login_history") != -1) {
-            historyPage hisPage = new historyPage((ID + "_log_his"), dtGenerator);
+            historyPage hisPage = new historyPage((ID), dtGenerator);
             hisPage.popupLoginHistory();
         }
         else if(comStr.indexOf("ban") != -1) {

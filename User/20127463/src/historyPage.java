@@ -1,3 +1,4 @@
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -49,12 +50,12 @@ public class historyPage implements ActionListener {
         swap_page_panel.setLayout(new BoxLayout(swap_page_panel, BoxLayout.X_AXIS));
 
         // Create next page and prev page button
-        Image right_arrow_img = imgConfig.imgLoading("./assets/icons/right-arrow.png");
+        Image right_arrow_img = imgConfig.imgLoading("./src/assets/icons/right-arrow.png");
         ImageIcon right_arrow_icon = new ImageIcon(imgConfig.ScaleImage(right_arrow_img, 50 / 3, 50 / 3));
         JButton right_arrow_btn = new JButton(right_arrow_icon);
         right_arrow_btn.setActionCommand("next_page");
 
-        Image left_arrow_img = imgConfig.imgLoading("./assets/icons/left-arrow.png");
+        Image left_arrow_img = imgConfig.imgLoading("./src/assets/icons/left-arrow.png");
         ImageIcon left_arrow_icon = new ImageIcon(imgConfig.ScaleImage(left_arrow_img, 50 / 3, 50 / 3));
         JButton left_arrow_btn = new JButton(left_arrow_icon);
         left_arrow_btn.setActionCommand("prev_page");

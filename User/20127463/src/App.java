@@ -1,12 +1,12 @@
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-
-public class users implements ActionListener {
+public class App implements ActionListener {
     JFrame jfrm = new JFrame("Users_main");
 
-    users() {
+    App() {
         // Tạo thể hiện của frame
         // JFrame jfrm = new JFrame("Users_main");
 
@@ -50,7 +50,7 @@ public class users implements ActionListener {
     public static void main(String args[]) {
         // Create the frame on the event dispatching thread.
         SwingUtilities.invokeLater(new Runnable() {
-            public void run() { new users(); }
+            public void run() { new App(); }
         });
     }
 }

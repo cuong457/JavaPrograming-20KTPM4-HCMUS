@@ -1,3 +1,4 @@
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -42,12 +43,12 @@ public class content implements ActionListener {
         swap_page_panel.setLayout(new BoxLayout(swap_page_panel, BoxLayout.X_AXIS));
 
         // Create next page and prev page button
-        Image right_arrow_img = imgConfig.imgLoading("./assets/icons/right-arrow.png");
+        Image right_arrow_img = imgConfig.imgLoading("./src/assets/icons/right-arrow.png");
         ImageIcon right_arrow_icon = new ImageIcon(imgConfig.ScaleImage(right_arrow_img, 50 / 3, 50 / 3));
         JButton right_arrow_btn = new JButton(right_arrow_icon);
         right_arrow_btn.setActionCommand("next_page");
 
-        Image left_arrow_img = imgConfig.imgLoading("./assets/icons/left-arrow.png");
+        Image left_arrow_img = imgConfig.imgLoading("./src/assets/icons/left-arrow.png");
         ImageIcon left_arrow_icon = new ImageIcon(imgConfig.ScaleImage(left_arrow_img, 50 / 3, 50 / 3));
         JButton left_arrow_btn = new JButton(left_arrow_icon);
         left_arrow_btn.setActionCommand("prev_page");
@@ -117,7 +118,7 @@ public class content implements ActionListener {
             btnHolder.setLayout(new BoxLayout(btnHolder, BoxLayout.Y_AXIS));
 
                 // Create ban button
-            ImageIcon banicon = new ImageIcon(imgConfig.ScaleImage((imgConfig.imgLoading("./assets/icons/ban.png")), 50 / 3, 50 / 3));
+            ImageIcon banicon = new ImageIcon(imgConfig.ScaleImage((imgConfig.imgLoading("./src/assets/icons/ban.png")), 50 / 3, 50 / 3));
             JButton banBtn = new JButton(banicon);
             // banBtn_2.setBorderPainted(false);
             banBtn.setFocusPainted(false);
@@ -125,7 +126,7 @@ public class content implements ActionListener {
             banBtn.setHorizontalTextPosition(SwingConstants.RIGHT);
 
                 //Create view button
-            ImageIcon viewicon = new ImageIcon(imgConfig.ScaleImage((imgConfig.imgLoading("./assets/icons/view.png")), 50 / 3, 50 / 3));
+            ImageIcon viewicon = new ImageIcon(imgConfig.ScaleImage((imgConfig.imgLoading("./src/assets/icons/view.png")), 50 / 3, 50 / 3));
             JButton viewBtn = new JButton(viewicon);
             // viewicon_2.setBorderPainted(false);
             viewBtn.setFocusPainted(false);
