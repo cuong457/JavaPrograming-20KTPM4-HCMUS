@@ -1,4 +1,3 @@
-package finalProject;
 
 import javax.swing.*;
 import java.awt.*;
@@ -7,6 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 
+import java.util.ArrayList;
+import java.util.List;
 
 public class friendlist extends JFrame implements ActionListener {
 
@@ -22,9 +23,11 @@ public class friendlist extends JFrame implements ActionListener {
     private JButton addfriendBtn;
     private JButton unfriendBtn;
 
-    private JList firendList;   
+    private JTextArea friendTextArea;   
     private JScrollPane friendScrollPane;
 
+    private String currentUser;
+    private List<String> friendList;
 
     // private JButton loginBtn;
     // private JButton signupBtn;
@@ -37,7 +40,8 @@ public class friendlist extends JFrame implements ActionListener {
 
     int step = 50;
 
-    public friendlist() {
+    public friendlist(String username) {
+        currentUser = username;
         initComponents();
     }
 
@@ -56,11 +60,10 @@ public class friendlist extends JFrame implements ActionListener {
         addfriendBtn = new JButton("Add friend");
         unfriendBtn = new JButton("Unfriend");
 
-        String[] demoFriend = {"user1", "user 2", "Tuesday","Wednesday", "Thursday","Friday","Saturday","Sunday"
-                , "Thursday","Friday","Saturday","Sunday", "Thursday","Friday","Saturday","Sunday", "Thursday"
-                , "Friday","Saturday","Sunday", "Thursday","Friday","Saturday","Sunday", "Thursday","Friday","Saturday","Sunday"};
-        firendList = new JList<>(demoFriend);
-        friendScrollPane = new JScrollPane(firendList);
+        friendTextArea = new JTextArea(16,16);
+        friendScrollPane = new JScrollPane(friendTextArea);
+
+        friendList = new ArrayList<String>();
 
         //set font
         headerLabel.setFont(new Font("Arial", Font.PLAIN, 28));
@@ -72,7 +75,22 @@ public class friendlist extends JFrame implements ActionListener {
         unfriendField.setFont(new Font("Arial", Font.PLAIN, 17));
         addfriendBtn.setFont(new Font("Arial", Font.BOLD, 17));
         unfriendBtn.setFont(new Font("Arial", Font.BOLD, 18));
-        firendList.setFont(new Font("Arial", Font.PLAIN, 18));
+        friendTextArea.setFont(new Font("Arial", Font.PLAIN, 18));
+
+        //add action
+        showAction();
+        
+        addfriendBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                addFriendAction();
+            }
+        });
+
+        unfriendBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                unFriendAction();
+            }
+        });
 
         //add to frame
         add(headerLabel);
@@ -84,7 +102,7 @@ public class friendlist extends JFrame implements ActionListener {
         add(unfriendField);
         add(addfriendBtn);
         add(unfriendBtn);
-        add(firendList);
+        add(friendTextArea);
         add(friendScrollPane);
         
         //set color
@@ -94,11 +112,11 @@ public class friendlist extends JFrame implements ActionListener {
         unfriendBtn.setBackground(new Color(255,84,84));
         unfriendBtn.setOpaque(true);
 
-        firendList.setBackground(new Color(246, 250, 142));
-        firendList.setOpaque(true);
+        friendTextArea.setBackground(new Color(246, 250, 142));
+        friendTextArea.setOpaque(true);
 
         //set scrollpane
-        friendScrollPane.setViewportView(firendList);
+        friendScrollPane.setViewportView(friendTextArea);
 
         //set size and location
         headerLabel.setBounds(leftx, lefty, 300, 60);
@@ -115,20 +133,70 @@ public class friendlist extends JFrame implements ActionListener {
         
         friendScrollPane.setBounds(leftx , lefty + 60, 300, 560);
 
-        firendList.setBounds(leftx, lefty + 60, 300, 560);
+        friendTextArea.setBounds(leftx, lefty + 60, 300, 560);
 
         //set text field enabled
         usernameField.setEnabled(false);
+        friendTextArea.setEditable(false);
 
-        //just for demo
-        usernameField.setText("demo");
+        //just for username of current user
+        usernameField.setText(currentUser);
 
         //set main frame
         setTitle("Friend list");
         setSize(720, 720);
         setLayout(null);
+        setLocationRelativeTo(null);
         setVisible(true);
         setResizable(false);
+    }
+
+    public void showAction(){
+        if (friendList != null){
+            friendList.clear();
+            friendList = new ArrayList<String>();
+        }
+        (new connectDB()).getAllFriends(currentUser, friendList);
+        friendTextArea.setText("");
+        for (String eachFriend : friendList){
+            friendTextArea.setText(friendTextArea.getText() + eachFriend + '\n');
+        }
+    }
+
+    public void addFriendAction(){
+        if (addfriendField.getText().equals("")){
+            JOptionPane.showMessageDialog(this, "Search username is empty");
+            return;
+        }
+        if (friendList.contains(addfriendField.getText())){
+            JOptionPane.showMessageDialog(this, "Friends already exist in the list");
+            return;
+        }
+        user newFriend = (new connectDB()).getUserByUsername(addfriendField.getText());
+        if (newFriend == null){
+            JOptionPane.showMessageDialog(this, "Username does not exsits");
+            return;
+        }
+        (new connectDB()).addNewFriend(currentUser, newFriend.getUsername());
+        showAction();
+    }
+
+    public void unFriendAction(){
+        if (unfriendField.getText().equals("")){
+            JOptionPane.showMessageDialog(this, "Search username is empty");
+            return;
+        }
+        if (!friendList.contains(unfriendField.getText())){
+            JOptionPane.showMessageDialog(this, "Friends do not already exist in the list");
+            return;
+        }
+        user newFriend = (new connectDB()).getUserByUsername(unfriendField.getText());
+        if (newFriend == null){
+            JOptionPane.showMessageDialog(this, "Username does not exsits");
+            return;
+        }
+        (new connectDB()).deleteFriend(currentUser, newFriend.getUsername());
+        showAction();
     }
 
     public void actionPerformed(ActionEvent e ){
@@ -139,7 +207,7 @@ public class friendlist extends JFrame implements ActionListener {
         // Create the frame on the event dispatching thread.
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                new friendlist();
+                new friendlist("anhzo12");
             }
         });
     }
