@@ -23,6 +23,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
  
+
   
  public class Server implements ActionListener {
     JFrame jfrm; 
@@ -183,6 +184,9 @@ import java.util.ArrayList;
                 }
             }
         }
+        // void broadcastMsg(String msg) {
+        //     this.client.pw.println(msg);
+        // }
         // Entry point of thread.
         public void run() {
             // Wait for the data from the client and reply
@@ -245,6 +249,86 @@ import java.util.ArrayList;
                             broadcastMsg(this.roomID, this.who, who + ": " + msg);
                         } catch(Exception e) {
                             System.err.println("Error chat receiver: " + e);
+                        }
+                    }
+                    else if(lowerCaseMsg.contains("login@")) {
+                        String msg = msgFromClient.substring(msgFromClient.lastIndexOf("@") + 1);
+                        String username = msg.substring(0, msg.indexOf("?") );
+                        String password = msg.substring(msg.lastIndexOf("?") +1);
+                        try {
+                            System.out.println(username + "  ..  " + password);
+
+                            //check db
+
+                            //send result
+                            pw.println("loginsuccess");
+                            pw.println("loginfail");
+                        } catch(Exception e) {
+                            System.err.println("Error: " + e);
+                        }
+                    }
+                    else if(lowerCaseMsg.contains("signup@")) {
+                        String msg = msgFromClient.substring(msgFromClient.lastIndexOf("@") + 1);
+                        String username = msg.substring(0, msg.indexOf("?") );
+                        String fullname = msg.substring(0, msg.indexOf("?") );
+                        String address = msg.substring(0, msg.indexOf("?") );
+                        String dob = msg.substring(0, msg.indexOf("?") );
+                        String email = msg.substring(0, msg.indexOf("?") );
+                        String password = msg.substring(msg.lastIndexOf("?") +1);
+                        try {
+                            System.out.println(username + "  ..  " + fullname + "  ..  " + address + "  ..  " + dob + "  ..  " + email + "  ..  " + password);
+
+                            //check db
+
+                            //send result
+                            pw.println("signupsuccess");
+                            // pw.println("signupfail");
+                        } catch(Exception e) {
+                            System.err.println("Error: " + e);
+                        }
+                    }
+                    else if(lowerCaseMsg.contains("friendlist@")) {
+                        String msg = msgFromClient.substring(msgFromClient.lastIndexOf("@") + 1);
+                        String username = msg.substring(0, msg.indexOf("?") );
+                        String usernameFr = msg.substring(msg.lastIndexOf("?") +1);
+                        try {
+                            System.out.println(username + "  ..  " + usernameFr);
+                            //check db
+
+                            //send result
+                            pw.println("sending_friend_list");
+                        } catch(Exception e) {
+                            System.err.println("Error: " + e);
+                        }
+                    }
+                    else if(lowerCaseMsg.contains("addfriend@")) {
+                        String msg = msgFromClient.substring(msgFromClient.lastIndexOf("@") + 1);
+                        String username = msg.substring(0, msg.indexOf("?") );
+                        String usernameFr = msg.substring(msg.lastIndexOf("?") +1);
+                        try {
+                            System.out.println(username + "  ..  " + usernameFr);
+                            //check db
+
+                            //send result
+                            pw.println("addfriendsuccess");
+                            pw.println("addfriendfail");
+                        } catch(Exception e) {
+                            System.err.println("Error: " + e);
+                        }
+                    }
+                    else if(lowerCaseMsg.contains("unfriend@")) {
+                        String msg = msgFromClient.substring(msgFromClient.lastIndexOf("@") + 1);
+                        String username = msg.substring(0, msg.indexOf("?") );
+                        String usernameFr = msg.substring(msg.lastIndexOf("?") +1);
+                        try {
+                            System.out.println(username + "  ..  " + usernameFr);
+                            //check db
+
+                            //send result
+                            pw.println("unfriendsuccess");
+                            pw.println("unfriendfail");
+                        } catch(Exception e) {
+                            System.err.println("Error: " + e);
                         }
                     }
                     else if (lowerCaseMsg.equals("exit")) {
