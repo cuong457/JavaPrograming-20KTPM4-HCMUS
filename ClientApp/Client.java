@@ -339,42 +339,42 @@ public class Client implements ActionListener {
     }
 
     // void runUsnRequest() {
-    //     // GUI
-    //     usn_jfrm.setLayout(new FlowLayout());
-    //     usn_jfrm.setResizable(false);
+        // // GUI
+        // usn_jfrm.setLayout(new FlowLayout());
+        // usn_jfrm.setResizable(false);
 
-    //     // Tùy chỉnh kích thước
-    //     usn_jfrm.setSize(800, 600);
-    //     usn_jfrm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // // Tùy chỉnh kích thước
+        // usn_jfrm.setSize(800, 600);
+        // usn_jfrm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-    //     JPanel wrapper = new JPanel();
-    //     wrapper.setLayout(new BoxLayout(wrapper, BoxLayout.Y_AXIS));
-    //     wrapper.setPreferredSize(new Dimension(800, 600));
+        // JPanel wrapper = new JPanel();
+        // wrapper.setLayout(new BoxLayout(wrapper, BoxLayout.Y_AXIS));
+        // wrapper.setPreferredSize(new Dimension(800, 600));
 
-    //     JLabel welcome = new JLabel("WELCOME TO MESSENGER (SHOPEE VERSION)");
-    //     JLabel title = new JLabel("Enter your username");
-    //     welcome.setAlignmentX(Component.CENTER_ALIGNMENT);
-    //     welcome.setFont(new Font("Verdana", Font.BOLD, 20));
-    //     welcome.setBorder(new EmptyBorder(40, 0, 170, 0));
-    //     title.setAlignmentX(Component.CENTER_ALIGNMENT);
-    //     title.setFont(new Font("Verdana", Font.BOLD, 18));
+        // JLabel welcome = new JLabel("WELCOME TO MESSENGER (SHOPEE VERSION)");
+        // JLabel title = new JLabel("Enter your username");
+        // welcome.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // welcome.setFont(new Font("Verdana", Font.BOLD, 20));
+        // welcome.setBorder(new EmptyBorder(40, 0, 170, 0));
+        // title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // title.setFont(new Font("Verdana", Font.BOLD, 18));
 
-    //     JPanel usn_input_field = new JPanel();
-    //     usn_input_field.setLayout(new FlowLayout());
+        // JPanel usn_input_field = new JPanel();
+        // usn_input_field.setLayout(new FlowLayout());
 
-    //     JTextField usn_input = new JTextField();
-    //     usn_input.setColumns(12);
-    //     usn_input.setFont(new Font("Verdana", Font.PLAIN, 18));
-    //     JButton get_usn_btn = new JButton("Enter");
-    //     get_usn_btn.addActionListener(new ActionListener() {
-    //         public void actionPerformed(java.awt.event.ActionEvent ae) {
-    //             usn = usn_input.getText();
-    //             if (usn != null) {
-    //                 usn_jfrm.setVisible(false);
-    //                 runChat();
-    //             }
-    //         }
-    //     });
+        // JTextField usn_input = new JTextField();
+        // usn_input.setColumns(12);
+        // usn_input.setFont(new Font("Verdana", Font.PLAIN, 18));
+        // JButton get_usn_btn = new JButton("Enter");
+        // get_usn_btn.addActionListener(new ActionListener() {
+        //     public void actionPerformed(java.awt.event.ActionEvent ae) {
+        //         usn = usn_input.getText();
+        //         if (usn != null) {
+        //             usn_jfrm.setVisible(false);
+        //             runChat();
+        //         }
+        //     }
+        // });
 
     //     usn_input_field.add(usn_input);
     //     usn_input_field.add(get_usn_btn);
@@ -617,12 +617,35 @@ public class Client implements ActionListener {
                                 JOptionPane.showMessageDialog(logIn, "Sign up fail!");
                             
                             } else if (command.contains("sending_friend_list")) {
-                                // do sth
+                                int nofFriend = Integer. valueOf(br.readLine());
+                                System.out.println(nofFriend);
+                                friendTextArea.setText("");
+                                while (nofFriend > 0){
+                                    friendTextArea.setText(friendTextArea.getText() + br.readLine() + '\n');
+                                    nofFriend--;
+                                }
                             
+                            } else if (command.contains("friend_wrongusernamme")) {
+                                JOptionPane.showMessageDialog(logIn, "This user does not exist!");
+                                
                             } else if (command.contains("addfriendsuccess")) {
-                                // do sth
+                                cp.getPrintWriter().println("friendlist@" + usn);
+
+                            } else if (command.contains("addfriend_isfriend")) {
+                                JOptionPane.showMessageDialog(logIn, "Friends already exist in the list!");
+                            
+                            } else if (command.contains("addfriendfail")) {
+                                JOptionPane.showMessageDialog(logIn, "Add friend fail!");
                             
                             } else if (command.contains("unfriendsuccess")) {
+                                cp.getPrintWriter().println("friendlist@" + usn);
+
+                            } else if (command.contains("unfriend_isnotfriend")) {
+                                JOptionPane.showMessageDialog(logIn, "The friend does not exist in the list yet!");
+                            
+                            } else if (command.contains("unfriendfail")) {
+                                JOptionPane.showMessageDialog(logIn, "Un friend fail!");
+                            
                                 // do sth
                             }
                         }
@@ -714,8 +737,11 @@ public class Client implements ActionListener {
                 return;
             }
             
-            String msg = usernameField.getText() + "?" + fullnameField.getText() + "?" + addressField.getText() + "?" + dobField.getText() + "?" + emailField.getText() + "?" + passwordField.getText();
+            String sex = maleRadioButton.isSelected() ? maleRadioButton.getText() : femaleRadioButton.getText();
+            String msg = usernameField.getText() + "?" + fullnameField.getText() + "?" + addressField.getText() + "?" + dobField.getText() + "?" + sex + "?" + emailField.getText() + "?" + passwordField.getText();
             cp.getPrintWriter().println(comStr + msg);
+        } else if (comStr.contains("friendlist@")) {
+            cp.getPrintWriter().println(comStr + usn);
         } else if (comStr.contains("addfriend@")) {
             if (addfriendField.getText().equals("")) {
                 JOptionPane.showMessageDialog(signUp, "Input username to add");

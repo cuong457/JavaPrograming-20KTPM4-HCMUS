@@ -33,6 +33,7 @@ import java.util.ArrayList;
     ServerProcess sp;
     ArrayList<HandleClient> clientList;
 
+    // ArrayList<user> allUser;
     JTextArea logHistory;
 
     // Demo database
@@ -50,6 +51,8 @@ import java.util.ArrayList;
         server = null;
         sp = new ServerProcess();
         clientList = new ArrayList<HandleClient>();
+        // allUser = new ArrayList<user>();
+        // allUser = (new db()).getAllUser();
 
         // Config database
         chatrooms.add(chatroom_1);
@@ -256,47 +259,63 @@ import java.util.ArrayList;
                         String username = msg.substring(0, msg.indexOf("?") );
                         String password = msg.substring(msg.lastIndexOf("?") +1);
                         try {
-                            System.out.println(username + "  ..  " + password);
+                            // System.out.println(username + "  ..  " + password);
 
                             //check db
-
-                            //send result
-                            pw.println("loginsuccess");
-                            pw.println("loginfail");
+                            if ((new db()).accountVerification(username, password))
+                                pw.println("loginsuccess");
+                            else
+                                pw.println("loginfail");
                         } catch(Exception e) {
                             System.err.println("Error: " + e);
                         }
                     }
                     else if(lowerCaseMsg.contains("signup@")) {
-                        String msg = msgFromClient.substring(msgFromClient.lastIndexOf("@") + 1);
+                        String msg = msgFromClient.substring(msgFromClient.indexOf("@") + 1);
                         String username = msg.substring(0, msg.indexOf("?") );
+                        msg = msg.substring(msg.indexOf("?") +1 );
                         String fullname = msg.substring(0, msg.indexOf("?") );
+                        msg = msg.substring(msg.indexOf("?") +1 );
                         String address = msg.substring(0, msg.indexOf("?") );
+                        msg = msg.substring(msg.indexOf("?") +1 );
                         String dob = msg.substring(0, msg.indexOf("?") );
+                        msg = msg.substring(msg.indexOf("?") +1 );
+                        String sex = msg.substring(0, msg.indexOf("?") );
+                        msg = msg.substring(msg.indexOf("?") +1 );
                         String email = msg.substring(0, msg.indexOf("?") );
                         String password = msg.substring(msg.lastIndexOf("?") +1);
                         try {
-                            System.out.println(username + "  ..  " + fullname + "  ..  " + address + "  ..  " + dob + "  ..  " + email + "  ..  " + password);
-
-                            //check db
-
-                            //send result
-                            pw.println("signupsuccess");
-                            // pw.println("signupfail");
+                            // System.out.println(username + "  ..  " + fullname + "  ..  " + address + "  ..  " + dob + sex + "  ..  " + email + "  ..  " + password);
+                            if ((new db()).checkUsn(username)){
+                                if((new db()).createNewUser((new user(fullname, username, password, address, dob, sex, email))) == 1)
+                                    pw.println("signupsuccess");
+                                else
+                                    pw.println("signupfail");
+                                } else
+                                pw.println("signupfail");
+                                
                         } catch(Exception e) {
                             System.err.println("Error: " + e);
                         }
                     }
                     else if(lowerCaseMsg.contains("friendlist@")) {
-                        String msg = msgFromClient.substring(msgFromClient.lastIndexOf("@") + 1);
-                        String username = msg.substring(0, msg.indexOf("?") );
-                        String usernameFr = msg.substring(msg.lastIndexOf("?") +1);
+                        String username = msgFromClient.substring(msgFromClient.lastIndexOf("@") + 1);
                         try {
-                            System.out.println(username + "  ..  " + usernameFr);
-                            //check db
-
-                            //send result
+                            // System.out.println(username);
+                            String friendRs = (new db()).getAllFriend(username);
+                            ArrayList<String> frl = new ArrayList<String>();
+                            frl.clear();
+                            while(friendRs.indexOf('/') != -1){
+                                frl.add((new db()).getNameById(friendRs.substring(0, friendRs.indexOf('/'))));
+                                friendRs = friendRs.substring(friendRs.indexOf('/') +1 );
+                            }
+                            frl.add((new db()).getNameById(friendRs));
+                            System.out.println(frl);
                             pw.println("sending_friend_list");
+                            pw.println(Integer.toString(frl.size()));
+                            for (String item : frl){
+                                pw.println(item);
+                            }
                         } catch(Exception e) {
                             System.err.println("Error: " + e);
                         }
@@ -306,12 +325,19 @@ import java.util.ArrayList;
                         String username = msg.substring(0, msg.indexOf("?") );
                         String usernameFr = msg.substring(msg.lastIndexOf("?") +1);
                         try {
-                            System.out.println(username + "  ..  " + usernameFr);
-                            //check db
+                            // System.out.println(username + "  ..  " + usernameFr);
+                            if (!(new db()).checkUsn(usernameFr)){
+                                if (!(new db()).isFriend(username, usernameFr) && !(new db()).isFriend(usernameFr, username)){
+                                    if ((new db()).addFriend2Users(username, usernameFr) != 0  && (new db()).addFriend2Users(usernameFr, username) != 0)
+                                            pw.println("addfriendsuccess");
+                                    else
+                                    pw.println("addfriendfail");
+                                } else
+                                    pw.println("addfriend_isfriend");
+                            } else
+                                pw.println("addfriend_wrongusernamme");
+                            
 
-                            //send result
-                            pw.println("addfriendsuccess");
-                            pw.println("addfriendfail");
                         } catch(Exception e) {
                             System.err.println("Error: " + e);
                         }
@@ -323,10 +349,19 @@ import java.util.ArrayList;
                         try {
                             System.out.println(username + "  ..  " + usernameFr);
                             //check db
-
+                            if (!(new db()).checkUsn(usernameFr)){
+                                if ((new db()).isFriend(username, usernameFr) && (new db()).isFriend(usernameFr, username)){
+                                    if ((new db()).unFriend2Users(username, usernameFr) != 0  && (new db()).unFriend2Users(usernameFr, username) != 0)
+                                            pw.println("unfriendsuccess");
+                                    else
+                                    pw.println("unfriendfail");
+                                } else
+                                    pw.println("unfriend_isnotfriend");
+                            } else
+                                pw.println("friend_wrongusernamme");
                             //send result
-                            pw.println("unfriendsuccess");
-                            pw.println("unfriendfail");
+                            // pw.println("unfriendsuccess");
+                            // pw.println("unfriendfail");
                         } catch(Exception e) {
                             System.err.println("Error: " + e);
                         }

@@ -1,0 +1,426 @@
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ArrayList;
+
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+//This class and data just create statically for test GUI.
+//The real database and how to get it will be update soon !
+
+public class db {
+    // static Map<String, Map<String, String>> users = new HashMap<String,
+    // Map<String, String>>();
+
+    static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
+    static final String DB_URL = "jdbc:mysql://localhost/java_chatting_app";
+    static final String USER = "root";
+    static final String PASS = "12345";
+
+    public db(){}
+
+    public Connection getConnection(String dbURL, String userName, String password) {
+        Connection conn = null;
+        try {
+            Class.forName(JDBC_DRIVER);
+            conn = DriverManager.getConnection(dbURL, userName, password);
+            // Return null if error occur and cannot connect to database
+        } catch (Exception ex) {
+            // Handle exception
+            ex.printStackTrace();
+        }
+        return conn;
+    }
+
+    public ArrayList<user> getAllUser() {
+
+        ArrayList<user> allUser = new ArrayList<>();
+        // Connect to database
+        Connection conn = getConnection(DB_URL, USER, PASS);
+        try {
+
+            // Check connetion result
+            if (conn != null) {
+                Statement st = conn.createStatement();
+                String sql = "select * from users";
+
+                // Get data from table 'users'
+                ResultSet user_rs = st.executeQuery(sql);
+                // Import users data
+                while (user_rs.next()) {
+                    user temp = new user(user_rs.getString("id"), user_rs.getString("name"),
+                            user_rs.getString("image"), user_rs.getString("bg"),
+                            user_rs.getString("usn"), user_rs.getString("password"),
+                            user_rs.getString("address"), user_rs.getString("dob"),
+                            user_rs.getString("sex"), user_rs.getString("email"), user_rs.getString("ban_status"));
+                    allUser.add(temp);
+                }
+            }
+
+            // Close connection
+            // conn.close();
+            return allUser;
+        } catch (SQLException se) {
+            se.printStackTrace();
+            return null;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        } finally {
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
+        }
+
+    }
+
+    public String getIdByUsername(String username){
+        Connection conn = getConnection(DB_URL, USER, PASS);
+        try {
+
+            // Check connetion result
+            if (conn != null) {
+                Statement st = conn.createStatement();
+                String sql = String.format("select * from users where usn = '%s'", username);
+
+                // Get data from table 'users'
+                ResultSet rs = st.executeQuery(sql);
+                // Import users data
+                if (rs.next()) {
+                    return rs.getString("id");
+                }
+                return null;
+            }
+            // return false;
+        } catch (SQLException se) {
+            se.printStackTrace();
+            // return false;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            // return false;
+        } finally {
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public String getNameById(String id){
+        Connection conn = getConnection(DB_URL, USER, PASS);
+        try {
+
+            // Check connetion result
+            if (conn != null) {
+                Statement st = conn.createStatement();
+                String sql = String.format("select * from users where id = '%s'", id);
+
+                // Get data from table 'users'
+                ResultSet rs = st.executeQuery(sql);
+                // Import users data
+                if (rs.next()) {
+                    return rs.getString("name");
+                }
+                return null;
+            }
+            // return false;
+        } catch (SQLException se) {
+            se.printStackTrace();
+            // return false;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            // return false;
+        } finally {
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public boolean accountVerification(String username, String password) throws SQLException {
+        // Connect to database
+        Connection conn = getConnection(DB_URL, USER, PASS);
+        try {
+
+            // Check connetion result
+            if (conn != null) {
+                Statement st = conn.createStatement();
+                String sql = String.format("select * from users where usn = '%s'", username);
+
+                // Get data from table 'users'
+                ResultSet rs = st.executeQuery(sql);
+                // Import users data
+                if (rs.next()) {
+                    if (password.equals(rs.getString("password"))){
+                        return true;
+                    }else
+                        return false;
+                }
+                // return false;
+            }
+            // return false;
+        } catch (SQLException se) {
+            se.printStackTrace();
+            // return false;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            // return false;
+        } finally {
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    public boolean checkUsn(String username) throws SQLException {
+        // Connect to database
+        Connection conn = getConnection(DB_URL, USER, PASS);
+        try {
+
+            // Check connetion result
+            if (conn != null) {
+                Statement st = conn.createStatement();
+                String sql = String.format("select * from users where usn = '%s'", username);
+
+                // Get data from table 'users'
+                ResultSet rs = st.executeQuery(sql);
+                // Import users data
+                if (!rs.next()) {
+                    return true;
+                }
+                return false;
+            }
+        } catch (SQLException se) {
+            se.printStackTrace();
+            // return false;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            // return false;
+        } finally {
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    public int createNewUser(user newUser){
+        Connection conn = getConnection(DB_URL, USER, PASS);
+        try {
+
+            // Check connetion result
+            if (conn != null) {
+                Statement st = conn.createStatement();
+                String sql = String.format("insert into users (id, name, usn, password, address, dob, sex, email) values ('%s','%s','%s','%s','%s','%s','%s','%s');", 
+                            newUser.getId(), newUser.getName(), newUser.getUsername(), newUser.getPassword(), newUser.getAddress(), newUser.getDob(), newUser.getSex(),
+                            newUser.getEmail());
+
+                // Get data from table 'users'
+                
+                int a =  st.executeUpdate(sql);
+                System.out.println("c > "+ a);
+                return a;
+                // return false;
+            }
+            // return false;
+        } catch (SQLException se) {
+            se.printStackTrace();
+            // return false;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            // return false;
+        } finally {
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
+    public String getAllFriend(String username){
+
+        // Connect to database
+        Connection conn = getConnection(DB_URL, USER, PASS);
+        try {
+
+            // Check connetion result
+            if (conn != null) {
+                Statement st = conn.createStatement();
+                String sql = String.format("select * from users where usn = '%s'", username);
+
+                // Get data from table 'users'
+                ResultSet rs = st.executeQuery(sql);
+                // Import users data
+                if (rs.next()) {
+                    return rs.getString("friend");
+                }
+            }
+
+        } catch (SQLException se) {
+            se.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public boolean isFriend(String username, String usernameFr){
+        Connection conn = getConnection(DB_URL, USER, PASS);
+        try {
+
+            // Check connetion result
+            if (conn != null) {
+                Statement st = conn.createStatement();
+                String sql = String.format("select * from users where usn = '%s'", username);
+
+                // Get data from table 'users'
+                ResultSet rs = st.executeQuery(sql);
+                // Import users data
+                if (rs.next()) {
+                    // System.out.println(rs.getString("friend"));
+                    boolean cc = rs.getString("friend").contains(getIdByUsername(usernameFr));
+                    System.out.println(username + " <> "+ usernameFr + " <> " + cc);
+                    return cc;
+                }
+                return false;
+            }
+        } catch (SQLException se) {
+            se.printStackTrace();
+            // return false;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            // return false;
+        } finally {
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    public int addFriend2Users(String username, String usernameFr){
+        Connection conn = getConnection(DB_URL, USER, PASS);
+        try {
+
+            // Check connetion result
+            if (conn != null) {
+                Statement st = conn.createStatement();
+
+                String sql = String.format("select * from users where usn = '%s'", username);
+
+                // Get data from table 'users'
+                ResultSet rs = st.executeQuery(sql);
+                // Import users data
+                if (!rs.next()) {
+                    return -1;
+                }
+                String friendRs = rs.getString("friend");
+                rs.close();
+                friendRs += "/" + getIdByUsername(usernameFr);
+                String sql2 = String.format("update users set friend = '%s' where usn = '%s'", friendRs, username);
+                return st.executeUpdate(sql2);
+            }
+        } catch (SQLException se) {
+            se.printStackTrace();
+            // return false;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            // return false;
+        } finally {
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
+    public int unFriend2Users(String username, String usernameFr){
+        Connection conn = getConnection(DB_URL, USER, PASS);
+        try {
+
+            // Check connetion result
+            if (conn != null) {
+                Statement st = conn.createStatement();
+
+                String sql = String.format("select * from users where usn = '%s'", username);
+
+                // Get data from table 'users'
+                ResultSet rs = st.executeQuery(sql);
+                // Import users data
+                if (!rs.next()) {
+                    return -1;
+                }
+                String friendid = getIdByUsername(usernameFr);
+                String friendRs = rs.getString("friend");
+                String sql2 = String.format("update users set friend = '%s' where usn = '%s'", friendRs, username);
+                String str = "";
+                if (friendRs == friendid) {
+                    sql2 = String.format("update users set friend = NULL where usn = '%s'", username);
+                } else if (friendRs.contains(friendid + "/" )) {
+                    str = friendRs.substring(0, friendRs.indexOf(friendid + "/" ))
+                            + friendRs.substring(friendRs.indexOf(friendid + "/" ) + 7);
+                    sql2 = String.format("update users set friend = '%s' where usn = '%s'", str, username);
+                } else if (friendRs.contains("/" + friendid )) {
+                    str = friendRs.substring(0, friendRs.indexOf("/" + friendid ))
+                            + friendRs.substring(friendRs.indexOf("/" + friendid ) + 7);
+                    sql2 = String.format("update users set friend = '%s' where usn = '%s'", str, username);
+                }
+                System.out.println(sql2);
+                return st.executeUpdate(sql2);
+            }
+        } catch (SQLException se) {
+            se.printStackTrace();
+            // return false;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            // return false;
+        } finally {
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
+}
