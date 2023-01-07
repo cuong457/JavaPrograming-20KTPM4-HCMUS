@@ -1,3 +1,4 @@
+
 /*
  * Copyright © 2022 by Phuc Dat
  * HCMUS Student 2022 Information
@@ -6,14 +7,13 @@
  *      Contact: sunrisecontinent.company@gmail.com
  */
 
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import java.awt.*;
-import java.awt.event.*;
-
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -21,11 +21,15 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
  
-
   
- public class Server implements ActionListener {
+ public class Server {
     JFrame jfrm; 
     // Config server
     int port_number;
@@ -44,6 +48,12 @@ import java.util.ArrayList;
     ArrayList<String> r1_content = new ArrayList<String>();
     ArrayList<String> r2_content = new ArrayList<String>();
     ArrayList<ArrayList<String>> cr_content = new ArrayList<ArrayList<String>>();
+
+    // Database config
+    private String DB_URL = "jdbc:mysql://localhost:3306/java_chatting_app";
+    private String USER_NAME = "root";
+    private String PASSWORD = "Duongminh410";
+    Connection conn = null;
   
     Server() {
         // Config server
@@ -68,6 +78,14 @@ import java.util.ArrayList;
             System.exit(1);
         }
 
+        // Try to connect to database
+            // Connect to database
+        conn = getConnection(DB_URL, USER_NAME, PASSWORD);
+            // Check connetion result
+        if(conn == null) {
+            System.out.println("Unable to connect to database.");
+            System.exit(1);
+        }
 
         // Create GUI
         jfrm = new JFrame("Server");
@@ -86,7 +104,6 @@ import java.util.ArrayList;
         header.setPreferredSize(new Dimension(412, 80));
         JLabel title = new JLabel("<html><br><i style=\"font-family:Verdana;font-size:14px;\">Server</i></html>");
         header.add(title);
-
 
         // Content
         JPanel infoSide = new JPanel();
@@ -154,9 +171,25 @@ import java.util.ArrayList;
             }
         }
     }
-  
+    public Connection getConnection(String dbURL, String userName, String password) {
+        Connection conn = null;
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            conn = DriverManager.getConnection(dbURL, userName, password);
+            // Return null if error occur and cannot connect to database
+        } catch (ClassNotFoundException ex) {
+            // Handle exception
+            ex.printStackTrace();
+        } catch (SQLException ex) {
+            // Handle exception
+            ex.printStackTrace();
+        }
+        return conn;
+    }
     public class HandleClient implements Runnable {
         Socket client;
+        InputStream clientIn;
+        OutputStream clientOut;
         BufferedReader br;
         PrintWriter pw;
         String roomID;
@@ -169,10 +202,10 @@ import java.util.ArrayList;
             this.client = c;
             
             try {
-                InputStream clientIn = this.client.getInputStream();
+                clientIn = this.client.getInputStream();
                 br = new BufferedReader(new InputStreamReader(clientIn));
 
-                OutputStream clientOut = this.client.getOutputStream();
+                clientOut = this.client.getOutputStream();
                 pw = new PrintWriter(clientOut, true);
             } catch (IOException ioe) {
 
@@ -187,9 +220,15 @@ import java.util.ArrayList;
                 }
             }
         }
-        // void broadcastMsg(String msg) {
-        //     this.client.pw.println(msg);
-        // }
+        void sendImage(String path) {
+            try {
+                File fi = new File(path);
+                byte[] b = Files.readAllBytes(fi.toPath());
+                DataOutputStream dos = new DataOutputStream(clientOut);
+                dos.writeInt(b.length);
+                dos.write(b);
+            } catch(IOException ioe) { ioe.printStackTrace(); }
+        }
         // Entry point of thread.
         public void run() {
             // Wait for the data from the client and reply
@@ -199,7 +238,6 @@ import java.util.ArrayList;
                     // Read data from the client
                     String msgFromClient;
                     while((msgFromClient = br.readLine()) == null) {} // Waiting for valid message
-                    System.out.println(msgFromClient);
                     // Send response to the client
                     String lowerCaseMsg = msgFromClient.toLowerCase();
                     if(lowerCaseMsg.equals("get_chatroom_data")) {
@@ -372,30 +410,104 @@ import java.util.ArrayList;
                         + ", " + client.getPort() + ") log out \n");
                         cr_content.get(Integer.parseInt(this.roomID)).add(this.who + " has left");
                         broadcastMsg(this.roomID, this.who, this.who + " has left");
-
                         client.close();
                         pw.close();
                         br.close();
                         break;
                     }
-                    
+                    else if(lowerCaseMsg.equals("admin_get_alluser")) {
+                        String query = "select * from users";
+                        try {
+                            ResultSet rs = conn.createStatement().executeQuery(query);
+                            pw.println("accepted");
+                            while(rs.next()) {
+                                pw.println(rs.getString("id"));     
+                                pw.println(rs.getString("ban_status"));     
+                                pw.println(rs.getString("name"));    
+                                pw.println(rs.getString("online_status"));  
+                                pw.println(rs.getString("usn"));    
+                                pw.println(rs.getString("psw"));   
+                                pw.println(rs.getString("address"));    
+                                pw.println(rs.getString("dob"));    
+                                pw.println(rs.getString("sex"));    
+                                pw.println(rs.getString("email"));  
+                                pw.println(rs.getString("nofFriends"));     
+                                pw.println(rs.getString("friend"));        
+                                pw.println(rs.getString("createAt"));   
+                                
+                                this.sendImage(rs.getString("image"));
+                                this.sendImage(rs.getString("bg"));
+                                br.readLine();
+                            }
+                            pw.println("end");
+                        } catch(SQLException e) {
+                            System.err.println("Error admin_get_alluser: " + e);
+                        }
+                    }
+                    else if(lowerCaseMsg.equals("admin_exit")) {
+                        logHistory.append(" Client (" + client.getInetAddress().getHostAddress()
+                        + ", " + client.getPort() + ") log out \n");
+                        client.close();
+                        pw.close();
+                        br.close();
+                        clientIn.close();
+                        clientOut.close();
+                        break;
+                    }
+                    else if(lowerCaseMsg.contains("get_history@")) {
+                        try{ 
+                            String targetId = lowerCaseMsg.split("@")[1];
+                            String query = "select * from user_login_history where user_id = '" + targetId + "'";
+                            ResultSet rs = conn.createStatement().executeQuery(query);
+                            pw.println("send_history@" + targetId);
+                            while(rs.next()) {
+                                pw.println(rs.getString("his_id"));
+                                pw.println(rs.getString("user_id"));
+                                pw.println(rs.getString("device_name"));
+                                pw.println(rs.getString("location"));
+                                pw.println(rs.getString("online_status"));
+                            }
+                            pw.println("end");
+                        } catch(SQLException e) { e.printStackTrace(); }
+                    }
+                    else if(lowerCaseMsg.contains("ban_user@")) {
+                        String target, query;
+                        if(lowerCaseMsg.contains("unban")) {
+                            target = lowerCaseMsg.substring(11);
+                            query = "update users set ban_status = 'normal' where id = '" + target + "'";
+                        }
+                        else {
+                            target = lowerCaseMsg.substring(9);
+                            query = "update users set ban_status = 'ban' where id = '" + target + "'";
+                        }
+                        try {
+                            conn.prepareStatement(query).execute();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else if(lowerCaseMsg.contains("change_psw_user@")) {
+                        String uid = lowerCaseMsg.split("@")[1];
+                        String new_psw = lowerCaseMsg.split("@")[2];
+                        String query = "update users set psw = '" + new_psw + "' where id = '" + uid + "'";
+                        try {
+                            conn.prepareStatement(query).execute();
+                            pw.println("commit_change_psw@" + uid + "@" + new_psw);
+                        } catch (SQLException e) {
+                            System.err.println("Cannot change password");
+                            e.printStackTrace();
+                        }
+                    }
                 }
             
             } catch (IOException ioe) {
                 System.out.println("Error while comunicating with client" + ioe);
+            } catch (NumberFormatException ne) {
+                System.out.println("Error while changing cr_content: " + ne);
             }
         }
     }  
-    
-    public void actionPerformed(java.awt.event.ActionEvent ae) {
-        // Lấy action command.
-        String comStr = ae.getActionCommand();
-        // Thiết lập ngắt khi bấm quit
-        if (comStr.equals("Exit"))  {
-            System.exit(0);
-        }
-        // Nếu không phải quit
-    }
+
      
     public static void main(String args[]) throws Exception {
         // Create the frame on the event dispatching thread.

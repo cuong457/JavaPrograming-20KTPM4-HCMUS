@@ -1,4 +1,4 @@
-package AdminApp;
+
 
 import javax.swing.ImageIcon;
 import java.awt.Image;

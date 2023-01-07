@@ -1,4 +1,4 @@
-package AdminApp;
+
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
