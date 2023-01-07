@@ -1,4 +1,3 @@
-package ClientApp;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -77,7 +76,6 @@ public class Client implements ActionListener {
                 try {
                     client.close();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 System.exit(0);
@@ -160,7 +158,6 @@ public class Client implements ActionListener {
                 try {
                     client.close();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 System.exit(0);
@@ -271,10 +268,7 @@ public class Client implements ActionListener {
                 cp.getPrintWriter().println("exit");
                 try {
                     client.close();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                } catch(IOException ioe) {}
                 System.exit(0);
             }
         });

@@ -36,6 +36,7 @@ import java.util.ArrayList;
     ServerSocket server;
     ServerProcess sp;
     ArrayList<HandleClient> clientList;
+    ArrayList<HandleClient> adminList;
 
     // ArrayList<user> allUser;
     JTextArea logHistory;
@@ -52,7 +53,7 @@ import java.util.ArrayList;
     // Database config
     private String DB_URL = "jdbc:mysql://localhost:3306/java_chatting_app";
     private String USER_NAME = "root";
-    private String PASSWORD = "12345";
+    private String PASSWORD = "Duongminh410";
     Connection conn = null;
     user current_user = null;
   
@@ -62,6 +63,7 @@ import java.util.ArrayList;
         server = null;
         sp = new ServerProcess();
         clientList = new ArrayList<HandleClient>();
+        adminList = new ArrayList<HandleClient>();
         // allUser = new ArrayList<user>();
         // allUser = (new db()).getAllUser();
 
@@ -152,7 +154,7 @@ import java.util.ArrayList;
                     Socket client = server.accept();
                     
                     logHistory.append(" Client (" + client.getInetAddress().getHostAddress()
-                    + ", " + client.getPort() + ") log in \n");  
+                    + ", " + client.getPort() + ") connected \n");
 
                     HandleClient hc = new HandleClient(client);
                     clientList.add(hc);
@@ -230,6 +232,7 @@ import java.util.ArrayList;
                 DataOutputStream dos = new DataOutputStream(clientOut);
                 dos.writeInt(b.length);
                 dos.write(b);
+                dos.flush();
             } catch(IOException ioe) { ioe.printStackTrace(); }
         }
         // Entry point of thread.
@@ -307,8 +310,12 @@ import java.util.ArrayList;
                                 current_user = (new db()).getUserByUsername(username);
                                 System.out.print(current_user.getName());
                                 pw.println("loginsuccess");
+                                for(int i = 0; i < adminList.size(); i++) {
+                                    adminList.get(i).pw.println("set_log@" + " Client () log in");
+                                }
+                                logHistory.append(" Client (" + client.getInetAddress().getHostAddress()
+                                + ", " + client.getPort() + ") log in \n");
                             }
-
                             else
                                 pw.println("loginfail");
                         } catch(Exception e) {
@@ -414,6 +421,10 @@ import java.util.ArrayList;
                         // Send end msg to client and noti on server then close client socket
                         logHistory.append(" Client (" + client.getInetAddress().getHostAddress()
                         + ", " + client.getPort() + ") log out \n");
+                        for(int i = 0; i < adminList.size(); i++) {
+                            adminList.get(i).pw.println("set_log@" + " Client (" + client.getInetAddress().getHostAddress()
+                            + ", " + client.getPort() + ") log out");
+                        }
                         cr_content.get(Integer.parseInt(this.roomID)).add(this.who + " has left");
                         broadcastMsg(this.roomID, this.who, this.who + " has left");
                         client.close();
@@ -422,6 +433,8 @@ import java.util.ArrayList;
                         break;
                     }
                     else if(lowerCaseMsg.equals("admin_get_alluser")) {
+                        // Set admin to admin list
+                        adminList.add(this);
                         String query = "select * from users";
                         try {
                             ResultSet rs = conn.createStatement().executeQuery(query);
@@ -459,6 +472,56 @@ import java.util.ArrayList;
                         clientIn.close();
                         clientOut.close();
                         break;
+                    }
+                    else if(lowerCaseMsg.contains("admin_set_user")) {
+                        String[] data = msgFromClient.split("&");
+
+                        String query = "update users set name='" + data[2] + "',"
+                                        + " usn='" + data[3] + "',"
+                                        + " email='" + data[4] + "',"
+                                        + " address='" + data[5] + "'"
+                                        + " where id='" + data[1] + "';";
+                        try {
+                            conn.prepareStatement(query).execute();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else if(lowerCaseMsg.contains("admin_get_all_group_chat")) {
+                        pw.println("send_all_group_chat_data");
+                        String query = "select * from group_chat";
+                        try {
+                            ResultSet rs = conn.createStatement().executeQuery(query);
+                            ArrayList<String> imgs_path = new ArrayList<>();
+                            while(rs.next()) {
+                                pw.println(rs.getString("id"));
+                                pw.println(rs.getString("group_name"));
+                                pw.println(rs.getString("createdAt"));
+                                pw.println(rs.getString("admin_id"));
+
+                                imgs_path.add(rs.getString("image"));
+                            }
+                            pw.println("end");
+                            for(int i = 0; i < imgs_path.size(); i++) {
+                                this.sendImage(imgs_path.get(i));
+                            }
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else if(lowerCaseMsg.contains("admin_get_group_user@")) {
+                        String gr_id = lowerCaseMsg.split("@")[1];
+                        pw.println("send_group_user_data");
+                        String query = "call getUsersOfGroup('"+gr_id+"')";
+                        try {
+                            ResultSet rs = conn.createStatement().executeQuery(query);
+                            while(rs.next()) {
+                                pw.println(rs.getString("user_id"));
+                            }
+                            pw.println("end");
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
                     }
                     else if(lowerCaseMsg.contains("get_history@")) {
                         try{ 
