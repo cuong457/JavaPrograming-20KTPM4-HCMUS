@@ -1,3 +1,4 @@
+package ClientApp;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -243,7 +244,12 @@ public class Client implements ActionListener {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
                 cp.getPrintWriter().println("exit");
-                client.close();
+                try {
+                    client.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
                 System.exit(0);
             }
         });

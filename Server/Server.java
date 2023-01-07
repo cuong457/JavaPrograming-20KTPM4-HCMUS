@@ -52,8 +52,9 @@ import java.util.ArrayList;
     // Database config
     private String DB_URL = "jdbc:mysql://localhost:3306/java_chatting_app";
     private String USER_NAME = "root";
-    private String PASSWORD = "Duongminh410";
+    private String PASSWORD = "12345";
     Connection conn = null;
+    user current_user = null;
   
     Server() {
         // Config server
@@ -171,6 +172,7 @@ import java.util.ArrayList;
             }
         }
     }
+    
     public Connection getConnection(String dbURL, String userName, String password) {
         Connection conn = null;
         try {
@@ -186,6 +188,7 @@ import java.util.ArrayList;
         }
         return conn;
     }
+
     public class HandleClient implements Runnable {
         Socket client;
         InputStream clientIn;
@@ -297,11 +300,15 @@ import java.util.ArrayList;
                         String username = msg.substring(0, msg.indexOf("?") );
                         String password = msg.substring(msg.lastIndexOf("?") +1);
                         try {
-                            // System.out.println(username + "  ..  " + password);
+                            System.out.println(username + "  ..  " + password);
 
                             //check db
-                            if ((new db()).accountVerification(username, password))
+                            if ((new db()).accountVerification(username, password)){
+                                current_user = (new db()).getUserByUsername(username);
+                                System.out.print(current_user.getName());
                                 pw.println("loginsuccess");
+                            }
+
                             else
                                 pw.println("loginfail");
                         } catch(Exception e) {
@@ -341,16 +348,13 @@ import java.util.ArrayList;
                         try {
                             // System.out.println(username);
                             String friendRs = (new db()).getAllFriend(username);
-                            ArrayList<String> frl = new ArrayList<String>();
-                            frl.clear();
-                            while(friendRs.indexOf('/') != -1){
-                                frl.add((new db()).getNameById(friendRs.substring(0, friendRs.indexOf('/'))));
-                                friendRs = friendRs.substring(friendRs.indexOf('/') +1 );
+                            String[] frl = friendRs.split("/");
+                            for (int i = 0;i<frl.length;++i){
+                                frl[i] = (new db()).getNameById(frl[i]);
                             }
-                            frl.add((new db()).getNameById(friendRs));
                             System.out.println(frl);
                             pw.println("sending_friend_list");
-                            pw.println(Integer.toString(frl.size()));
+                            pw.println(Integer.toString(frl.length));
                             for (String item : frl){
                                 pw.println(item);
                             }

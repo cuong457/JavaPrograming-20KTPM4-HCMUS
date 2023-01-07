@@ -1,6 +1,9 @@
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ArrayList;
 
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -17,7 +20,7 @@ public class db {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://localhost/java_chatting_app";
     static final String USER = "root";
-    static final String PASS = "Duongminh410";
+    static final String PASS = "12345";
 
     public db(){}
 
@@ -52,7 +55,7 @@ public class db {
                 while (user_rs.next()) {
                     user temp = new user(user_rs.getString("id"), user_rs.getString("name"),
                             user_rs.getString("image"), user_rs.getString("bg"),
-                            user_rs.getString("usn"), user_rs.getString("psw"),
+                            user_rs.getString("usn"), user_rs.getString("password"),
                             user_rs.getString("address"), user_rs.getString("dob"),
                             user_rs.getString("sex"), user_rs.getString("email"), user_rs.getString("ban_status"));
                     allUser.add(temp);
@@ -76,8 +79,50 @@ public class db {
                 se.printStackTrace();
             }
         }
+
     }
 
+    public user getUserByUsername(String username){
+        Connection conn = getConnection(DB_URL, USER, PASS);
+        try {
+
+            // Check connetion result
+            if (conn != null) {
+                Statement st = conn.createStatement();
+                String sql = String.format("select * from users where usn = '%s'", username);
+
+                // Get data from table 'users'
+                ResultSet user_rs = st.executeQuery(sql);
+                // Import users data
+                if (user_rs.next()) {
+                    user temp = new user(user_rs.getString("id"), user_rs.getString("name"),
+                            user_rs.getString("image"), user_rs.getString("bg"),
+                            user_rs.getString("usn"), user_rs.getString("password"),
+                            user_rs.getString("address"), user_rs.getString("dob"),
+                            user_rs.getString("sex"), user_rs.getString("email"), user_rs.getString("ban_status"));
+                    // System.out.println(temp.getName());
+                    return temp;
+                }
+                return null;
+            }
+            // return false;
+        } catch (SQLException se) {
+            se.printStackTrace();
+            // return false;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            // return false;
+        } finally {
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
+        }
+        return null;
+    }
+    
     public String getIdByUsername(String username){
         Connection conn = getConnection(DB_URL, USER, PASS);
         try {
@@ -162,7 +207,7 @@ public class db {
                 ResultSet rs = st.executeQuery(sql);
                 // Import users data
                 if (rs.next()) {
-                    if (password.equals(rs.getString("psw"))){
+                    if (password.equals(rs.getString("password"))){
                         return true;
                     }else
                         return false;
@@ -229,7 +274,7 @@ public class db {
             // Check connetion result
             if (conn != null) {
                 Statement st = conn.createStatement();
-                String sql = String.format("insert into users (id, name, usn, psw, address, dob, sex, email) values ('%s','%s','%s','%s','%s','%s','%s','%s');", 
+                String sql = String.format("insert into users (id, name, usn, password, address, dob, sex, email) values ('%s','%s','%s','%s','%s','%s','%s','%s');", 
                             newUser.getId(), newUser.getName(), newUser.getUsername(), newUser.getPassword(), newUser.getAddress(), newUser.getDob(), newUser.getSex(),
                             newUser.getEmail());
 
@@ -306,9 +351,16 @@ public class db {
                 // Import users data
                 if (rs.next()) {
                     // System.out.println(rs.getString("friend"));
-                    boolean cc = rs.getString("friend").contains(getIdByUsername(usernameFr));
-                    System.out.println(username + " <> "+ usernameFr + " <> " + cc);
-                    return cc;
+                    String friendid = getIdByUsername(usernameFr);
+                    String friendRs = rs.getString("friend");
+                    if (friendRs == null){
+                        return false;
+                    }
+                    String[] friendlist = friendRs.split("/");
+                    for (String item : friendlist){
+                        if (item.equals(friendid))
+                            return true;
+                    }
                 }
                 return false;
             }
@@ -347,7 +399,10 @@ public class db {
                 }
                 String friendRs = rs.getString("friend");
                 rs.close();
-                friendRs += "/" + getIdByUsername(usernameFr);
+                if (friendRs == null)
+                    friendRs = getIdByUsername(usernameFr);
+                else
+                    friendRs += "/" + getIdByUsername(usernameFr);
                 String sql2 = String.format("update users set friend = '%s' where usn = '%s'", friendRs, username);
                 return st.executeUpdate(sql2);
             }
@@ -386,18 +441,20 @@ public class db {
                 }
                 String friendid = getIdByUsername(usernameFr);
                 String friendRs = rs.getString("friend");
-                String sql2 = String.format("update users set friend = '%s' where usn = '%s'", friendRs, username);
-                String str = "";
-                if (friendRs == friendid) {
-                    sql2 = String.format("update users set friend = NULL where usn = '%s'", username);
-                } else if (friendRs.contains(friendid + "/" )) {
-                    str = friendRs.substring(0, friendRs.indexOf(friendid + "/" ))
-                            + friendRs.substring(friendRs.indexOf(friendid + "/" ) + 7);
-                    sql2 = String.format("update users set friend = '%s' where usn = '%s'", str, username);
-                } else if (friendRs.contains("/" + friendid )) {
-                    str = friendRs.substring(0, friendRs.indexOf("/" + friendid ))
-                            + friendRs.substring(friendRs.indexOf("/" + friendid ) + 7);
-                    sql2 = String.format("update users set friend = '%s' where usn = '%s'", str, username);
+                String sql2 = "";
+                if (friendRs.equals(friendid)) {
+                    sql2 = String.format("update users set friend = NULL where usn = '%s' ", username);
+                } else {
+                    String str = "";
+                    String[] friendlist = friendRs.split("/");
+                    for (String item : friendlist ){
+                        if (item.equals(friendid))
+                            continue;
+                        str += item + "/";
+                    }
+                    str = str.substring(0, str.length()-1);
+                    
+                    sql2 = String.format("update users set friend = NULL where usn = '%s' ", str);
                 }
                 System.out.println(sql2);
                 return st.executeUpdate(sql2);
