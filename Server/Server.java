@@ -348,15 +348,17 @@ import java.util.ArrayList;
                         try {
                             // System.out.println(username);
                             String friendRs = (new db()).getAllFriend(username);
-                            String[] frl = friendRs.split("/");
-                            for (int i = 0;i<frl.length;++i){
-                                frl[i] = (new db()).getNameById(frl[i]);
-                            }
-                            System.out.println(frl);
-                            pw.println("sending_friend_list");
-                            pw.println(Integer.toString(frl.length));
-                            for (String item : frl){
-                                pw.println(item);
+                                if (friendRs != null){
+                                String[] frl = friendRs.split("/");
+                                for (int i = 0;i<frl.length;++i){
+                                    frl[i] = (new db()).getNameById(frl[i]);
+                                }
+                                System.out.println(frl);
+                                pw.println("sending_friend_list");
+                                pw.println(Integer.toString(frl.length));
+                                for (String item : frl){
+                                    pw.println(item);
+                                }
                             }
                         } catch(Exception e) {
                             System.err.println("Error: " + e);

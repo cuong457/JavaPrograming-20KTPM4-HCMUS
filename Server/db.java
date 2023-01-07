@@ -441,6 +441,7 @@ public class db {
                 }
                 String friendid = getIdByUsername(usernameFr);
                 String friendRs = rs.getString("friend");
+                System.out.println("conc" + friendRs);
                 String sql2 = "";
                 if (friendRs.equals(friendid)) {
                     sql2 = String.format("update users set friend = NULL where usn = '%s' ", username);
@@ -451,10 +452,11 @@ public class db {
                         if (item.equals(friendid))
                             continue;
                         str += item + "/";
+                        System.out.println(item);
                     }
                     str = str.substring(0, str.length()-1);
                     
-                    sql2 = String.format("update users set friend = NULL where usn = '%s' ", str);
+                    sql2 = String.format("update users set friend = '%s' where usn = '%s' ", str, username);
                 }
                 System.out.println(sql2);
                 return st.executeUpdate(sql2);

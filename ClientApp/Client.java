@@ -70,6 +70,19 @@ public class Client implements ActionListener {
 
         logIn.setLayout(null);
         logIn.setResizable(false);
+        logIn.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                cp.getPrintWriter().println("exit");
+                try {
+                    client.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                System.exit(0);
+            }
+        });
 
         logIn.setSize(720, 720);
         logIn.setLocationRelativeTo(null);
@@ -140,7 +153,19 @@ public class Client implements ActionListener {
     void signup() {
         signUp.setLayout(null);
         signUp.setResizable(false);
-
+        signUp.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                cp.getPrintWriter().println("exit");
+                try {
+                    client.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                System.exit(0);
+            }
+        });
         signUp.setSize(720, 720);
         signUp.setLocationRelativeTo(null);
         signUp.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
