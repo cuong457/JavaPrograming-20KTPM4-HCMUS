@@ -43,7 +43,7 @@ public class App implements ActionListener {
     // Create main panel
     JPanel content = new JPanel();
     // User page
-    personalPage usrPage;
+    personalPage usrPage = null;
     // Create Img generator 
     img imgConfig = new img();
     // the default number of users per page and initial index
@@ -54,6 +54,7 @@ public class App implements ActionListener {
     JButton cancelBtn;
     ArrayList<JPanel[]> current_page = new ArrayList<>();
     JComboBox<String> sortInput, sortOrderInput;
+    JPanel homePnl;
 
     App() {
         // Run admin socket thread
@@ -85,7 +86,7 @@ public class App implements ActionListener {
         jfrm.setVisible(true); // Hiển thị frame
 
         //Create Home Panel
-        JPanel homePnl = new JPanel();
+        homePnl = new JPanel();
         homePnl.setLayout(new BorderLayout());
         homePnl.setBounds(397, 0, 412, 620);
         homePnl.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, Color.BLACK));
@@ -133,7 +134,6 @@ public class App implements ActionListener {
                 if(msg.equals("accepted")) {
                     while(!((msg = br.readLine()).equals("end"))) {
                         Map<String, String> user = new HashMap<String, String>();
-                        System.out.println(msg);
                         user.put("id", msg);   
 
                         msg = br.readLine();
@@ -182,7 +182,6 @@ public class App implements ActionListener {
                         pw.println("done");
                     }
                 }
-                System.out.println("Finish");
                 
             } catch (IOException ioe) {
                 System.err.println("Error: " + ioe);
@@ -305,23 +304,23 @@ public class App implements ActionListener {
         int default_num = 6;
         JPanel imgPanel;
         JTextField newPswInput;
-        JFrame changePswFrame, editDetailFrame, parent;
+        JFrame changePswFrame, editDetailFrame;
         JPanel viewWrapper = null, allFriendWrapper = null;
     
         personalPage(Map<String, String> data, String userId) {
             user = data;
             ID = userId;
-            // MAIN FRAME
-            parent = new JFrame("Personal Information"){
-                @Override
-                public Dimension getPreferredSize() {
-                    return new Dimension(824, 735);
-                };
-            };
-            parent.setLayout(new BoxLayout(parent.getContentPane(), BoxLayout.Y_AXIS));
-            parent.setResizable(false);
+            // // MAIN FRAME
+            // parent = new JFrame("Personal Information"){
+            //     @Override
+            //     public Dimension getPreferredSize() {
+            //         return new Dimension(824, 735);
+            //     };
+            // };
+            // parent.setLayout(new BoxLayout(parent.getContentPane(), BoxLayout.Y_AXIS));
+            // parent.setResizable(false);
         }
-        public void runView() {
+        public JPanel runView() {
             viewWrapper = new JPanel(){
                 @Override
                 public Dimension getPreferredSize() {
@@ -329,9 +328,6 @@ public class App implements ActionListener {
                 };
             };
             viewWrapper.setLayout(null);
-            // Thêm menu bar vào frame
-            JMenuBar jmb = (new menubar()).createMenu();
-            parent.setJMenuBar(jmb);
     
             ImageIcon avt = new ImageIcon(imgConfig.ScaleImage(user_avts.get(ID).getImage(), 120, 120));
             ImageIcon bg = new ImageIcon(imgConfig.ScaleImage(user_bgs.get(ID).getImage(), 824, 200));
@@ -481,18 +477,23 @@ public class App implements ActionListener {
             friendImagePanel.setBounds(0, 375, 395, 300);
     
             inforPanel.setBounds(412, 315, 412, 150);
-    
+
+            // Back to home button
+            JButton backToHome = new JButton("< Back to home");
+            backToHome.setBounds(650, 640, 150, 20);
+            backToHome.setActionCommand("back_to_home");
+            backToHome.addActionListener(this);
+
+            viewWrapper.add(backToHome);
             viewWrapper.add(imgPanel);
             viewWrapper.add(inforPanel);
             viewWrapper.add(friendTitle);
             viewWrapper.add(nofFriends);
             viewWrapper.add(seeAllFriendBtn);
             viewWrapper.add(friendImagePanel);
-            parent.getContentPane().add(viewWrapper);
-            parent.pack();
-            parent.setVisible(true);
+            return viewWrapper;
         }
-        public void runAllFriend() {
+        public JPanel runAllFriend() {
             allFriendWrapper = new JPanel(){
                 @Override
                 public Dimension getPreferredSize() {
@@ -555,7 +556,7 @@ public class App implements ActionListener {
             allFriendWrapper.add(titleWrap);
             allFriendWrapper.add(jsp);
             jsp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-            parent.getContentPane().add(allFriendWrapper);
+            return allFriendWrapper;
         }
         
         public void runChangePassword() {
@@ -625,7 +626,16 @@ public class App implements ActionListener {
             if(comStr.contains("about_user")) {
                 String thisId = comStr.split("_", 2)[1];
                 personalPage usrPage = new personalPage(users.get(findUserById(thisId)), thisId);
-                usrPage.runView();
+                JPanel viewpnl = usrPage.runView();
+                viewpnl.setBounds(0, 0, 824, 735);
+                // Refresh
+                if(viewWrapper != null) {
+                    viewWrapper.setVisible(false);
+                }
+                if(allFriendWrapper != null) {
+                    allFriendWrapper.setVisible(false);
+                }
+                jfrm.getContentPane().add(viewpnl);
             }
             else if(comStr.contains("see_login_history")) {
                 on_process = true;
@@ -694,11 +704,19 @@ public class App implements ActionListener {
                 }                  
             }
             else if(comStr.contains("see_all_friend")) {
-                viewWrapper.setVisible(false);
                 if(allFriendWrapper == null) {
-                    runAllFriend();
+                    JPanel allfrpnl = this.runAllFriend();
+                    allfrpnl.setBounds(0, 0, 800, 680);
+                    // Refresh
+                    if(viewWrapper != null) {
+                        viewWrapper.setVisible(false);
+                    }
+                    jfrm.getContentPane().add(allfrpnl);
                 }
                 else {
+                    if(viewWrapper != null) {
+                        viewWrapper.setVisible(false);
+                    }
                     allFriendWrapper.setVisible(true);
                 }
             }
@@ -710,6 +728,12 @@ public class App implements ActionListener {
                 else {
                     viewWrapper.setVisible(true);
                 }
+            }
+            else if(comStr.contains("back_to_home")) {
+                jfrm.getContentPane().removeAll();
+                jfrm.getContentPane().add(homePnl);
+                homePnl.setVisible(true);
+                jfrm.repaint();
             }
         }
     }     
@@ -1142,7 +1166,11 @@ public class App implements ActionListener {
         if(comStr.indexOf("about_user") != -1) {
             String thisId = comStr.split("_", 2)[1];
             usrPage = new personalPage(users.get(findUserById(thisId)), thisId);
-            usrPage.runView();
+            JPanel viewpnl = usrPage.runView();
+            viewpnl.setBounds(0, 0, 824, 735);
+            // Refresh frame
+            jfrm.getContentPane().add(viewpnl);
+            homePnl.setVisible(false);
         }
         else if(comStr.equals("next_page")) {
             if(init_index < users.size()) {

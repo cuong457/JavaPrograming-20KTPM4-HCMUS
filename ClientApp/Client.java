@@ -1,4 +1,3 @@
-package ClientApp;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -240,6 +239,14 @@ public class Client implements ActionListener {
 
         friendList.setLayout(null);
         friendList.setResizable(false);
+        friendList.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                cp.getPrintWriter().println("exit");
+                client.close();
+                System.exit(0);
+            }
+        });
 
         friendList.setSize(720, 720);
         friendList.setLocationRelativeTo(null);

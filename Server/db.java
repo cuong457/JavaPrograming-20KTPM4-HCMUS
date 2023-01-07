@@ -1,9 +1,6 @@
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ArrayList;
 
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -20,7 +17,7 @@ public class db {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://localhost/java_chatting_app";
     static final String USER = "root";
-    static final String PASS = "12345";
+    static final String PASS = "Duongminh410";
 
     public db(){}
 
@@ -55,7 +52,7 @@ public class db {
                 while (user_rs.next()) {
                     user temp = new user(user_rs.getString("id"), user_rs.getString("name"),
                             user_rs.getString("image"), user_rs.getString("bg"),
-                            user_rs.getString("usn"), user_rs.getString("password"),
+                            user_rs.getString("usn"), user_rs.getString("psw"),
                             user_rs.getString("address"), user_rs.getString("dob"),
                             user_rs.getString("sex"), user_rs.getString("email"), user_rs.getString("ban_status"));
                     allUser.add(temp);
@@ -79,7 +76,6 @@ public class db {
                 se.printStackTrace();
             }
         }
-
     }
 
     public String getIdByUsername(String username){
@@ -166,7 +162,7 @@ public class db {
                 ResultSet rs = st.executeQuery(sql);
                 // Import users data
                 if (rs.next()) {
-                    if (password.equals(rs.getString("password"))){
+                    if (password.equals(rs.getString("psw"))){
                         return true;
                     }else
                         return false;
@@ -233,7 +229,7 @@ public class db {
             // Check connetion result
             if (conn != null) {
                 Statement st = conn.createStatement();
-                String sql = String.format("insert into users (id, name, usn, password, address, dob, sex, email) values ('%s','%s','%s','%s','%s','%s','%s','%s');", 
+                String sql = String.format("insert into users (id, name, usn, psw, address, dob, sex, email) values ('%s','%s','%s','%s','%s','%s','%s','%s');", 
                             newUser.getId(), newUser.getName(), newUser.getUsername(), newUser.getPassword(), newUser.getAddress(), newUser.getDob(), newUser.getSex(),
                             newUser.getEmail());
 
