@@ -142,6 +142,7 @@ create table group_chat
 	group_name varchar(60),
 	image varchar(100),
     createdAt varchar(45),
+    admin_id varchar(8) not null, 
 
 	primary key (id)
 );
@@ -154,8 +155,8 @@ create table group_chat_users
 	primary key (group_id, user_id)
 );
 
-insert into group_chat values ('group_1', 'Lap trinh Java', '', '01-07-2023');
-insert into group_chat values ('group_2', 'Lap trinh Web', '', '01-07-2023');
+insert into group_chat values ('group_1', 'Lap trinh Java', '', '01-07-2023', 'user_2');
+insert into group_chat values ('group_2', 'Lap trinh Web', '', '01-07-2023', 'user_2');
 
 insert into group_chat_users values ('group_1', 'user_1');
 insert into group_chat_users values ('group_1', 'user_3');

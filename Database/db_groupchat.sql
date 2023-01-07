@@ -100,10 +100,11 @@ drop procedure if exists addChat;
 DELIMITER //
 create procedure addChat (
 	in send_id varchar(8),
-	in receive_id varchar(8)
+	in receive_id varchar(8),
+    in messages varchar(500) charset utf8
 )
 begin 
-	
+	insert into chat_history values (send_id, receive_id, messages, DATE_FORMAT(NOW(), '%Y-%m-%d %T'));
 end //
 DELIMITER ;
 
