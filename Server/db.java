@@ -274,8 +274,8 @@ public class db {
             // Check connetion result
             if (conn != null) {
                 Statement st = conn.createStatement();
-                String sql = String.format("insert into users (id, name, usn, password, address, dob, sex, email) values ('%s','%s','%s','%s','%s','%s','%s','%s');", 
-                            newUser.getId(), newUser.getName(), newUser.getUsername(), newUser.getPassword(), newUser.getAddress(), newUser.getDob(), newUser.getSex(),
+                String sql = String.format("insert into users (id, name, image, usn, password, address, dob, sex, email) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s');", 
+                            newUser.getId(), newUser.getName(), newUser.getImage(), newUser.getUsername(), newUser.getPassword(), newUser.getAddress(), newUser.getDob(), newUser.getSex(),
                             newUser.getEmail());
 
                 // Get data from table 'users'

@@ -10,6 +10,7 @@ public class user {
         int count = (new db()).getAllUser().size() + 1;
         this.id = String.format("user_" + count );
         this.name = name;
+        this.image = "default.jpg";
         this.usn = usn;
         this.password = password;
         this.address = address;
@@ -41,6 +42,10 @@ public class user {
     }
     public String getName(){
         return name;
+    }
+
+    public String getImage(){
+        return image;
     }
 
     public String getUsername(){
