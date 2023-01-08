@@ -7,12 +7,16 @@
  *      Contact: sunrisecontinent.company@gmail.com
  */
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.GroupLayout.Group;
 import javax.swing.border.EmptyBorder;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -30,9 +34,11 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-
-public class Server {
-    JFrame jfrm;
+import java.util.Random;
+ 
+  
+ public class Server {
+    JFrame jfrm; 
     // Config server
     int port_number;
     ServerSocket server;
@@ -243,7 +249,40 @@ public class Server {
                 ioe.printStackTrace();
             }
         }
-
+        ImageIcon receiveImage() {
+            ImageIcon result = null;
+            try {
+                DataInputStream dis = new DataInputStream(clientIn);
+                int length = dis.readInt();
+                if(length > 0) {
+                    byte[] message = new byte[length];
+                    dis.readFully(message, 0, message.length);
+                    ByteArrayInputStream bais = new ByteArrayInputStream(message);
+                    BufferedImage bi = ImageIO.read(bais);
+                    if(bi != null) {
+                        result = new ImageIcon(bi);
+                    }
+                }
+            } catch (IOException e) {
+                System.err.println("Error receive image file");
+                e.printStackTrace();
+            }
+            return result;
+        }
+        public void saveImageIconToLocal(ImageIcon imgc, String type, String Path){
+            Image img = imgc.getImage();
+            int width = img.getWidth(null);
+            int height = img.getHeight(null);
+            BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            Graphics g = bi.getGraphics();
+            g.drawImage(img, 0,0, null);
+            g.dispose();
+            try {
+                ImageIO.write(bi, type, new File(Path));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         // Entry point of thread.
         public void run() {
             // Wait for the data from the client and reply
@@ -693,6 +732,68 @@ public class Server {
                                 pw.println(rs.getString("send_at"));
                             }
                             pw.println("end");
+                        } catch (SQLException sqle) {
+                            sqle.printStackTrace();
+                        }
+                    }
+                    else if(lowerCaseMsg.contains("create_group@")) {
+                        ImageIcon gr_avt = receiveImage();
+                        String[] datapackage = msgFromClient.split("@");
+                        try {
+                            String query = "select * from group_chat";
+                            ResultSet rs = conn.createStatement().executeQuery(query);
+                            boolean is_group = false;
+                            int i = 1;
+                            while(rs.next()) {
+                                if(datapackage[1].equals(rs.getString("group_name"))) {
+                                    pw.println("deny_create_group_groupname");
+                                    is_group = true;
+                                }
+                                i++;
+                            }
+                            String gr_id = "group_" + Integer.toString(i);
+
+                            if(!is_group) {
+                                query = "select * from users";
+                                ResultSet rs1 = conn.createStatement().executeQuery(query);
+                                boolean is_user = false;
+                                String thisUserId = "";
+                                while(rs1.next()) {
+                                    if(datapackage[2].equals(rs1.getString("name"))) {
+                                        is_user = true;
+                                        thisUserId = rs1.getString("id");
+                                        break;
+                                    }
+                                }
+
+                                if(is_user) {
+                                    System.out.println("Come here");
+                                    String path = "./assets/imgs/group_avts/g" + Integer.toString(i) + ".png";
+                                    saveImageIconToLocal(gr_avt, "png", path);
+                                    
+                                    LocalDateTime now = LocalDateTime.now();  
+
+                                    query = "insert into group_chat values('" + gr_id
+                                            + "','" + datapackage[1] + "','" + path + "','" + dtf.format(now)
+                                            + "','" + datapackage[3] + "')";
+                                    conn.prepareStatement(query).execute();
+
+                                    query = "insert into group_chat_users values('" + gr_id
+                                    + "','" + thisUserId + "')";
+                                    conn.prepareStatement(query).execute();
+
+                                    query = "insert into group_chat_users values('" + gr_id
+                                    + "','" + datapackage[3] + "')";
+                                    conn.prepareStatement(query).execute();
+
+
+                                    pw.println("create_group_success");
+                                }
+                                else {
+                                    pw.println("deny_create_group_username");
+                                }
+                            }
+
                         } catch (SQLException sqle) {
                             sqle.printStackTrace();
                         }

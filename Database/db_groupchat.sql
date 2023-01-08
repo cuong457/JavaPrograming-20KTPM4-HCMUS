@@ -69,7 +69,7 @@ begin
     then
         select send, sender_name, receive, receiver_name, message, send_at 
         from (select * from chat_history chat
-            where (chat.receive = send_id or chat.receive = receive_id)
+            where (chat.send = send_id and chat.receive = receive_id) or (chat.send = receive_id and chat.receive = send_id)
                 and chat.send_at > (select dlt_chat.delete_at 
                             from delete_chat_time_stamp dlt_chat 
                             where dlt_chat.chat_from = send_id
@@ -80,7 +80,8 @@ begin
     else
         select send, sender_name, receive, receiver_name, message, send_at 
         from (select * from chat_history chat
-                where (chat.receive = send_id or chat.receive = receive_id)) chat_his
+                where (chat.send = send_id and chat.receive = receive_id) or (chat.send = receive_id and chat.receive = send_id)
+            ) chat_his
         left join (select id, name sender_name from users) nameSend on nameSend.id = chat_his.send
         left join (select id, name receiver_name from users) nameRecv on nameRecv.id = chat_his.receive
         order by send_at;
@@ -122,17 +123,19 @@ DELIMITER ;
 
 drop procedure if exists getFriendsAndGroups;
 DELIMITER //
+drop procedure if exists getFriendsAndGroups;
+DELIMITER //
 create procedure getFriendsAndGroups (
     in user_id varchar(8)
 )
 begin
-    select distinct(receive) as id, group_name as name, image
-    from chat_history ch join group_chat gc on gc.id = ch.receive
-    where send = user_id
+    select distinct(group_id) as id, group_name as name, image
+    from group_chat gc left join group_chat_users gcu on gc.id = gcu.group_id
+    where gcu.user_id = user_id
     union
-    select distinct(receive) as id, name, image
-    from chat_history ch join users u on u.id = ch.receive
-    where send = user_id;
+    select id, name, image
+    from users u
+    where friend like concat('%', user_id, '%') and not (id = user_id);
 end //
 DELIMITER ;
 
@@ -156,11 +159,11 @@ call getAllHistory('user_2');
 
 call getFriendsAndGroups('user_2');
 
-call getGroupChatHistory('user_2', 'group_1'); 
-
-call getPrivateChatHistory('user_1', 'user_2');
+call getGroupChatHistory('user_2', 'group_5'); 
 
 call getPrivateChatHistory('user_2', 'user_1');
+
+call getPrivateChatHistory('user_2', 'user_7');
 
 call deleteChatHistory('user_1', 'user_2');
 

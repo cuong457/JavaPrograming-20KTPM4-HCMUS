@@ -32,7 +32,7 @@ public class Client implements ActionListener {
     ButtonGroup sexBtnGroup;
     JRadioButton maleRadioButton, femaleRadioButton;
     JScrollPane friendScrollPane;
-    private List<String> friendStrList;
+    // private List<String> friendStrList;
     boolean is_login_success = false;
     String current_chat_target = "";
 
