@@ -22,7 +22,8 @@ public class db {
     static final String USER = "root";
     static final String PASS = "12345";
 
-    public db(){}
+    public db() {
+    }
 
     public Connection getConnection(String dbURL, String userName, String password) {
         Connection conn = null;
@@ -82,7 +83,7 @@ public class db {
 
     }
 
-    public user getUserByUsername(String username){
+    public user getUserByUsername(String username) {
         Connection conn = getConnection(DB_URL, USER, PASS);
         try {
 
@@ -122,8 +123,8 @@ public class db {
         }
         return null;
     }
-    
-    public String getIdByUsername(String username){
+
+    public String getIdByUsername(String username) {
         Connection conn = getConnection(DB_URL, USER, PASS);
         try {
 
@@ -158,7 +159,7 @@ public class db {
         return null;
     }
 
-    public String getNameById(String id){
+    public String getNameById(String id) {
         Connection conn = getConnection(DB_URL, USER, PASS);
         try {
 
@@ -207,9 +208,9 @@ public class db {
                 ResultSet rs = st.executeQuery(sql);
                 // Import users data
                 if (rs.next()) {
-                    if (password.equals(rs.getString("psw"))){
+                    if (password.equals(rs.getString("psw"))) {
                         return true;
-                    }else
+                    } else
                         return false;
                 }
                 // return false;
@@ -267,21 +268,23 @@ public class db {
         return false;
     }
 
-    public int createNewUser(user newUser){
+    public int createNewUser(user newUser) {
         Connection conn = getConnection(DB_URL, USER, PASS);
         try {
 
             // Check connetion result
             if (conn != null) {
                 Statement st = conn.createStatement();
-                String sql = String.format("insert into users (id, name, image, usn, psw, address, dob, sex, email) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s');", 
-                            newUser.getId(), newUser.getName(), newUser.getImage(), newUser.getUsername(), newUser.getPassword(), newUser.getAddress(), newUser.getDob(), newUser.getSex(),
-                            newUser.getEmail());
+                String sql = String.format(
+                        "insert into users (id, name, image, usn, psw, address, dob, sex, email) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s');",
+                        newUser.getId(), newUser.getName(), newUser.getImage(), newUser.getUsername(),
+                        newUser.getPassword(), newUser.getAddress(), newUser.getDob(), newUser.getSex(),
+                        newUser.getEmail());
 
                 // Get data from table 'users'
-                
-                int a =  st.executeUpdate(sql);
-                System.out.println("c > "+ a);
+
+                int a = st.executeUpdate(sql);
+                System.out.println("c > " + a);
                 return a;
                 // return false;
             }
@@ -303,7 +306,7 @@ public class db {
         return 0;
     }
 
-    public String getAllFriend(String username){
+    public String getAllFriend(String username) {
 
         // Connect to database
         Connection conn = getConnection(DB_URL, USER, PASS);
@@ -337,7 +340,91 @@ public class db {
         return null;
     }
 
-    public boolean isFriend(String username, String usernameFr){
+    public String getFriendOnline(String username) {
+
+        // Connect to database
+        Connection conn = getConnection(DB_URL, USER, PASS);
+        try {
+
+            // Check connetion result
+            if (conn != null) {
+                Statement st = conn.createStatement();
+                String sql = String.format("select * from users where usn = '%s'", username);
+
+                // Get data from table 'users'
+                ResultSet rs = st.executeQuery(sql);
+                // Import users data
+                String frdonl = "";
+                if (rs.next()) {
+                    String[] frl = rs.getString("friend").split("/");
+                    for (String fr : frl) {
+                        // System.out.println(fr);
+                        ResultSet rs2 = st.executeQuery(String.format("select * from users where id = '%s'", fr));
+                        if (!rs2.next())
+                            continue;
+                        // System.out.print(rs2.getString("online_status"));
+                        if (rs2.getString("online_status").equals("Online now")) {
+                            // System.out.println( " > done");
+                            frdonl += fr + "/";
+                        }
+                        rs2.close();
+
+                    }
+                    System.out.println("frdonl> "+ frdonl.length());
+                    if (frdonl != null && frdonl != "" && frdonl.length() >= 2)
+                        return frdonl.substring(0, frdonl.length() - 1);
+                }
+                return null;
+            }
+
+        } catch (SQLException se) {
+            se.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public int setOnlineStatus(String username, String status) {
+        Connection conn = getConnection(DB_URL, USER, PASS);
+        try {
+
+            // Check connetion result
+            if (conn != null) {
+                Statement st = conn.createStatement();
+                String sql = String.format("update users set online_status = '%s' where usn = '%s' ", status, username);
+
+                int a =  st.executeUpdate(sql);
+                System.out.println("status > "+ sql);
+                return a;
+
+            }
+            return 0;
+        } catch (SQLException se) {
+            se.printStackTrace();
+            // return false;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            // return false;
+        } finally {
+            try {
+                if (conn != null)
+                    conn.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
+    public boolean isFriend(String username, String usernameFr) {
         Connection conn = getConnection(DB_URL, USER, PASS);
         try {
 
@@ -353,11 +440,11 @@ public class db {
                     // System.out.println(rs.getString("friend"));
                     String friendid = getIdByUsername(usernameFr);
                     String friendRs = rs.getString("friend");
-                    if (friendRs == null){
+                    if (friendRs == null) {
                         return false;
                     }
                     String[] friendlist = friendRs.split("/");
-                    for (String item : friendlist){
+                    for (String item : friendlist) {
                         if (item.equals(friendid))
                             return true;
                     }
@@ -381,7 +468,7 @@ public class db {
         return false;
     }
 
-    public int addFriend2Users(String username, String usernameFr){
+    public int addFriend2Users(String username, String usernameFr) {
         Connection conn = getConnection(DB_URL, USER, PASS);
         try {
 
@@ -423,7 +510,7 @@ public class db {
         return 0;
     }
 
-    public int unFriend2Users(String username, String usernameFr){
+    public int unFriend2Users(String username, String usernameFr) {
         Connection conn = getConnection(DB_URL, USER, PASS);
         try {
 
@@ -448,14 +535,14 @@ public class db {
                 } else {
                     String str = "";
                     String[] friendlist = friendRs.split("/");
-                    for (String item : friendlist ){
+                    for (String item : friendlist) {
                         if (item.equals(friendid))
                             continue;
                         str += item + "/";
                         System.out.println(item);
                     }
-                    str = str.substring(0, str.length()-1);
-                    
+                    str = str.substring(0, str.length() - 1);
+
                     sql2 = String.format("update users set friend = '%s' where usn = '%s' ", str, username);
                 }
                 System.out.println(sql2);

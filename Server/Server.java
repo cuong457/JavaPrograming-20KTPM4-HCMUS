@@ -30,10 +30,9 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
- 
-  
- public class Server {
-    JFrame jfrm; 
+
+public class Server {
+    JFrame jfrm;
     // Config server
     int port_number;
     ServerSocket server;
@@ -45,8 +44,8 @@ import java.util.ArrayList;
     JTextArea logHistory;
 
     // Demo database
-    String[] chatroom_1 = {"0", "Chisato and Takina team", "./assets/imgs/avts/avt_3.png"};
-    String[] chatroom_2 = {"1", "Uzui Tengen team", "./assets/imgs/avts/avt_1.png"};
+    String[] chatroom_1 = { "0", "Chisato and Takina team", "./assets/imgs/avts/avt_3.png" };
+    String[] chatroom_2 = { "1", "Uzui Tengen team", "./assets/imgs/avts/avt_1.png" };
     ArrayList<String[]> chatrooms = new ArrayList<String[]>();
 
     ArrayList<String> r1_content = new ArrayList<String>();
@@ -59,7 +58,7 @@ import java.util.ArrayList;
     private String PASSWORD = "12345";
     Connection conn = null;
     user current_user = null;
-  
+
     Server() {
         // Config server
         port_number = 2014;
@@ -85,10 +84,10 @@ import java.util.ArrayList;
         }
 
         // Try to connect to database
-            // Connect to database
+        // Connect to database
         conn = getConnection(DB_URL, USER_NAME, PASSWORD);
-            // Check connetion result
-        if(conn == null) {
+        // Check connetion result
+        if (conn == null) {
             System.out.println("Unable to connect to database.");
             System.exit(1);
         }
@@ -99,9 +98,9 @@ import java.util.ArrayList;
         jfrm.setLayout(new BoxLayout(jfrm.getContentPane(), BoxLayout.Y_AXIS));
         jfrm.setResizable(false);
 
-        // Tùy chỉnh kích thước     
+        // Tùy chỉnh kích thước
         jfrm.setSize(412, 800);
-        
+
         jfrm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         // Header
@@ -123,7 +122,7 @@ import java.util.ArrayList;
 
         // Info side config
         JLabel ss_localport = new JLabel("Local Port: " + server.getLocalPort());
-        infoSide.add(ss_localport);            
+        infoSide.add(ss_localport);
         // Log side config
         logHistory = new JTextArea();
         logSide.add(logHistory);
@@ -131,7 +130,8 @@ import java.util.ArrayList;
         // Footer
         JPanel footer = new JPanel();
         footer.setLayout(new FlowLayout());
-        JLabel copyright = new JLabel("<html><p style=\"font-family:Verdana;font-size:8px;\">Copyright © 2022 by Phan Phuc Dat</p></html>");
+        JLabel copyright = new JLabel(
+                "<html><p style=\"font-family:Verdana;font-size:8px;\">Copyright © 2022 by Phan Phuc Dat</p></html>");
         footer.add(copyright);
 
         jfrm.getContentPane().add(header);
@@ -147,37 +147,38 @@ import java.util.ArrayList;
 
     public class ServerProcess implements Runnable {
         ServerProcess() {
-            
+
         }
+
         public void run() {
-        
+
             // Start listen to client
             try {
-                while(true) {
+                while (true) {
                     Socket client = server.accept();
-                    
+
                     logHistory.append(" Client (" + client.getInetAddress().getHostAddress()
-                    + ", " + client.getPort() + ") connected \n");
+                            + ", " + client.getPort() + ") connected \n");
 
                     HandleClient hc = new HandleClient(client);
                     clientList.add(hc);
                     Thread hc_thread = new Thread(hc);
                     hc_thread.start();
-                } 
+                }
             } catch (IOException ie) {
                 // Handle Exception
             } finally {
-                if(server != null) {   
+                if (server != null) {
                     try {
                         server.close();
-                    } catch(IOException ioe) {
+                    } catch (IOException ioe) {
                         System.out.println("Unable to close server socket." + ioe);
                     }
                 }
             }
         }
     }
-    
+
     public Connection getConnection(String dbURL, String userName, String password) {
         Connection conn = null;
         try {
@@ -208,7 +209,7 @@ import java.util.ArrayList;
             this.who = "";
 
             this.client = c;
-            
+
             try {
                 clientIn = this.client.getInputStream();
                 br = new BufferedReader(new InputStreamReader(clientIn));
@@ -219,15 +220,17 @@ import java.util.ArrayList;
 
             }
         }
+
         void broadcastMsg(String rid, String sender, String msg) {
-            for(int i = 0; i < clientList.size(); i++) {
-                if(clientList.get(i).roomID.equals(rid)) {
-                    if(sender.equals(null) || !sender.equals(clientList.get(i).who))
+            for (int i = 0; i < clientList.size(); i++) {
+                if (clientList.get(i).roomID.equals(rid)) {
+                    if (sender.equals(null) || !sender.equals(clientList.get(i).who))
                         clientList.get(i).pw.println("newmsg@" + msg);
-                    
+
                 }
             }
         }
+
         void sendImage(String path) {
             try {
                 File fi = new File(path);
@@ -236,51 +239,53 @@ import java.util.ArrayList;
                 dos.writeInt(b.length);
                 dos.write(b);
                 dos.flush();
-            } catch(IOException ioe) { ioe.printStackTrace(); }
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
         }
+
         // Entry point of thread.
         public void run() {
             // Wait for the data from the client and reply
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");  
-                        
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+
             try {
-                while(true) {
+                while (true) {
                     // Read data from the client
                     String msgFromClient;
-                    while((msgFromClient = br.readLine()) == null) {} // Waiting for valid message
-                    // Send response to the client
+                    while ((msgFromClient = br.readLine()) == null) {
+                    } // Waiting for valid message
+                      // Send response to the client
                     String lowerCaseMsg = msgFromClient.toLowerCase();
-                    if(lowerCaseMsg.equals("get_chatroom_data")) {
-                        for(String[] chatroom : chatrooms) {
-                            for(String data : chatroom) 
+                    if (lowerCaseMsg.equals("get_chatroom_data")) {
+                        for (String[] chatroom : chatrooms) {
+                            for (String data : chatroom)
                                 pw.println(data);
                             pw.println("end");
                         }
                         pw.println("end");
-                    }
-                    else if(lowerCaseMsg.contains("usn@")) {
+                    } else if (lowerCaseMsg.contains("usn@")) {
                         this.who = msgFromClient.substring(msgFromClient.lastIndexOf("@") + 1);
-                    }
-                    else if(lowerCaseMsg.contains("@toroomid@")) {
+                    } else if (lowerCaseMsg.contains("@toroomid@")) {
                         String rid = lowerCaseMsg.substring(lowerCaseMsg.lastIndexOf("@") + 1);
-                        for(int i = 0; i < chatrooms.size(); i++) {
-                            if(chatrooms.get(i)[0].equals(rid)) {
+                        for (int i = 0; i < chatrooms.size(); i++) {
+                            if (chatrooms.get(i)[0].equals(rid)) {
                                 // Give data of room
                                 pw.println("sending_chat_history");
                                 cr_content.get(i).add(who + " has joined");
                                 broadcastMsg(Integer.toString(i), this.who, who + " has joined");
-                                for(String r_content : cr_content.get(i))
+                                for (String r_content : cr_content.get(i))
                                     pw.println(r_content);
                                 pw.println("end");
 
                                 this.roomID = Integer.toString(i);
-                                
+
                                 int firstsym = lowerCaseMsg.indexOf("@");
-                                if(firstsym != 0) {
+                                if (firstsym != 0) {
                                     String prev_rid = lowerCaseMsg.substring(0, firstsym);
-                                    
-                                    for(int j = 0; j < chatrooms.size(); j++) {
-                                        if(chatrooms.get(j)[0].equals(prev_rid)) {
+
+                                    for (int j = 0; j < chatrooms.size(); j++) {
+                                        if (chatrooms.get(j)[0].equals(prev_rid)) {
                                             cr_content.get(j).add(who + " has left");
                                             break;
                                         }
@@ -288,64 +293,66 @@ import java.util.ArrayList;
 
                                     broadcastMsg(prev_rid, this.who, who + " has left");
                                 }
-                                
+
                                 break;
                             }
                         }
-                    }
-                    else if(lowerCaseMsg.contains("chat@")) {
+                    } else if (lowerCaseMsg.contains("chat@")) {
                         String[] dataPackage = msgFromClient.split("@");
                         // UPDATE IN DATABASE
-                        LocalDateTime now = LocalDateTime.now();  
-                        String query = "insert into chat_history values ('" + dataPackage[1] 
-                                    + "', '"+ dataPackage[2] +"', '"+ dataPackage[3] +"', '" + dtf.format(now) + "')";
-                        try{
-                            conn.prepareStatement(query).execute(); 
-                        } catch(SQLException sqle) {
+                        LocalDateTime now = LocalDateTime.now();
+                        String query = "insert into chat_history values ('" + dataPackage[1]
+                                + "', '" + dataPackage[2] + "', '" + dataPackage[3] + "', '" + dtf.format(now) + "')";
+                        try {
+                            conn.prepareStatement(query).execute();
+                        } catch (SQLException sqle) {
                             sqle.printStackTrace();
                         }
 
                         // BROADCAST TO CURRENT ONLINE MEMBER
-                            // If send to group
-                        if(dataPackage[2].contains("group")) {
-                            for(int i = 0; i < clientList.size(); i++) {
+                        // If send to group
+                        if (dataPackage[2].contains("group")) {
+                            for (int i = 0; i < clientList.size(); i++) {
                                 System.out.println("Check: " + dataPackage[1] + "----" + clientList.get(i).who);
-                                if(!dataPackage[1].equals(clientList.get(i).who))
-                                    clientList.get(i).pw.println("set_chat@"+dataPackage[2]+"@"+dataPackage[3] + "@" + dataPackage[1]);
+                                if (!dataPackage[1].equals(clientList.get(i).who))
+                                    clientList.get(i).pw.println(
+                                            "set_chat@" + dataPackage[2] + "@" + dataPackage[3] + "@" + dataPackage[1]);
                             }
                         }
-                            // If send to user
+                        // If send to user
                         else {
                             System.out.println("private");
-                            for(int i = 0; i < clientList.size(); i++) {
-                                clientList.get(i).pw.println("set_chat@"+dataPackage[1]+"@"+dataPackage[3] + "@" + dataPackage[1]);
+                            for (int i = 0; i < clientList.size(); i++) {
+                                clientList.get(i).pw.println(
+                                        "set_chat@" + dataPackage[1] + "@" + dataPackage[3] + "@" + dataPackage[1]);
                             }
                         }
-                        
-                    }
-                    else if(lowerCaseMsg.contains("login@")) {
+
+                    } else if (lowerCaseMsg.contains("login@")) {
                         String msg = msgFromClient.substring(msgFromClient.lastIndexOf("@") + 1);
-                        String username = msg.substring(0, msg.indexOf("?") );
-                        String password = msg.substring(msg.lastIndexOf("?") +1);
+                        String username = msg.substring(0, msg.indexOf("?"));
+                        String password = msg.substring(msg.lastIndexOf("?") + 1);
                         try {
                             System.out.println(username + "  ..  " + password);
 
-                            //check db
-                            if ((new db()).accountVerification(username, password)){
+                            // check db
+                            if ((new db()).accountVerification(username, password)) {
                                 current_user = (new db()).getUserByUsername(username);
+                                (new db()).setOnlineStatus(username, "Online now");
                                 pw.println("loginsuccess@" + current_user.getId());
-                                who=current_user.getId();
-                                LocalDateTime now = LocalDateTime.now();  
-                                for(int i = 0; i < adminList.size(); i++) {
-                                    adminList.get(i).pw.println("set_log@" + dtf.format(now) + ": Client ("+current_user.getName()+", "+current_user.getUsername()+") log in");
+                                who = current_user.getId();
+                                LocalDateTime now = LocalDateTime.now();
+                                for (int i = 0; i < adminList.size(); i++) {
+                                    adminList.get(i).pw.println("set_log@" + dtf.format(now) + ": Client ("
+                                            + current_user.getName() + ", " + current_user.getUsername() + ") log in");
                                 }
                                 logHistory.append(" Client (" + client.getInetAddress().getHostAddress()
-                                + ", " + client.getPort() + ") log in \n");
+                                        + ", " + client.getPort() + ") log in \n");
 
                                 // Send chat history
-                                String query = "call getAllHistory('" + current_user.getId() +"')";
+                                String query = "call getAllHistory('" + current_user.getId() + "')";
                                 ResultSet rs = conn.createStatement().executeQuery(query);
-                                while(rs.next()) {
+                                while (rs.next()) {
                                     pw.println(rs.getString("send"));
                                     pw.println(rs.getString("sender_name"));
                                     pw.println(rs.getString("receive"));
@@ -353,115 +360,140 @@ import java.util.ArrayList;
                                     pw.println(rs.getString("message"));
                                 }
                                 pw.println("end");
-                            }
-                            else
+                            } else
                                 pw.println("loginfail");
-                        } catch(Exception e) {
+                        } catch (Exception e) {
                             System.err.println("Error: " + e);
                         }
-                    }
-                    else if(lowerCaseMsg.contains("signup@")) {
+                    } else if (lowerCaseMsg.contains("signup@")) {
                         String msg = msgFromClient.substring(msgFromClient.indexOf("@") + 1);
-                        String username = msg.substring(0, msg.indexOf("?") );
-                        msg = msg.substring(msg.indexOf("?") +1 );
-                        String fullname = msg.substring(0, msg.indexOf("?") );
-                        msg = msg.substring(msg.indexOf("?") +1 );
-                        String address = msg.substring(0, msg.indexOf("?") );
-                        msg = msg.substring(msg.indexOf("?") +1 );
-                        String dob = msg.substring(0, msg.indexOf("?") );
-                        msg = msg.substring(msg.indexOf("?") +1 );
-                        String sex = msg.substring(0, msg.indexOf("?") );
-                        msg = msg.substring(msg.indexOf("?") +1 );
-                        String email = msg.substring(0, msg.indexOf("?") );
-                        String password = msg.substring(msg.lastIndexOf("?") +1);
+                        String username = msg.substring(0, msg.indexOf("?"));
+                        msg = msg.substring(msg.indexOf("?") + 1);
+                        String fullname = msg.substring(0, msg.indexOf("?"));
+                        msg = msg.substring(msg.indexOf("?") + 1);
+                        String address = msg.substring(0, msg.indexOf("?"));
+                        msg = msg.substring(msg.indexOf("?") + 1);
+                        String dob = msg.substring(0, msg.indexOf("?"));
+                        msg = msg.substring(msg.indexOf("?") + 1);
+                        String sex = msg.substring(0, msg.indexOf("?"));
+                        msg = msg.substring(msg.indexOf("?") + 1);
+                        String email = msg.substring(0, msg.indexOf("?"));
+                        String password = msg.substring(msg.lastIndexOf("?") + 1);
                         try {
-                            // System.out.println(username + "  ..  " + fullname + "  ..  " + address + "  ..  " + dob + sex + "  ..  " + email + "  ..  " + password);
-                            if ((new db()).checkUsn(username)){
-                                if((new db()).createNewUser((new user(fullname, username, password, address, dob, sex, email))) == 1)
+                            // System.out.println(username + " .. " + fullname + " .. " + address + " .. " +
+                            // dob + sex + " .. " + email + " .. " + password);
+                            if ((new db()).checkUsn(username)) {
+                                if ((new db()).createNewUser(
+                                        (new user(fullname, username, password, address, dob, sex, email))) == 1)
                                     pw.println("signupsuccess");
                                 else
                                     pw.println("signupfail");
-                                } else
+                            } else
                                 pw.println("signupfail");
-                                
-                        } catch(Exception e) {
+
+                        } catch (Exception e) {
                             System.err.println("Error: " + e);
                         }
-                    }
-                    else if(lowerCaseMsg.contains("friendlist@")) {
+                    } else if (lowerCaseMsg.contains("friendlist@")) {
                         String username = msgFromClient.substring(msgFromClient.lastIndexOf("@") + 1);
                         try {
                             // System.out.println(username);
                             String friendRs = (new db()).getAllFriend(username);
-                                if (friendRs != null){
+                            if (friendRs != null) {
                                 String[] frl = friendRs.split("/");
-                                for (int i = 0;i<frl.length;++i){
+                                for (int i = 0; i < frl.length; ++i) {
                                     frl[i] = (new db()).getNameById(frl[i]);
                                 }
                                 System.out.println(frl);
                                 pw.println("sending_friend_list");
                                 pw.println(Integer.toString(frl.length));
-                                for (String item : frl){
+                                for (String item : frl) {
                                     pw.println(item);
                                 }
                             }
-                        } catch(Exception e) {
+                        } catch (Exception e) {
                             System.err.println("Error: " + e);
                         }
-                    }
-                    else if(lowerCaseMsg.contains("addfriend@")) {
-                        String msg = msgFromClient.substring(msgFromClient.lastIndexOf("@") + 1);
-                        String username = msg.substring(0, msg.indexOf("?") );
-                        String usernameFr = msg.substring(msg.lastIndexOf("?") +1);
+                    } else if (lowerCaseMsg.contains("friendonline@")) {
+                        String username = msgFromClient.substring(msgFromClient.lastIndexOf("@") + 1);
                         try {
-                            // System.out.println(username + "  ..  " + usernameFr);
-                            if (!(new db()).checkUsn(usernameFr)){
-                                if (!(new db()).isFriend(username, usernameFr) && !(new db()).isFriend(usernameFr, username)){
-                                    if ((new db()).addFriend2Users(username, usernameFr) != 0  && (new db()).addFriend2Users(usernameFr, username) != 0)
-                                            pw.println("addfriendsuccess");
+                            // System.out.println(username);
+                            String friendRs = (new db()).getFriendOnline(username);
+                            if (friendRs != null) {
+                                String[] frl = friendRs.split("/");
+                                for (int i = 0; i < frl.length; ++i) {
+                                    frl[i] = (new db()).getNameById(frl[i]);
+                                }
+
+                                System.out.println(frl);
+                                pw.println("sending_friend_online");
+                                pw.println(Integer.toString(frl.length));
+                                for (String item : frl) {
+                                    pw.println(item);
+                                }
+                            }
+                        } catch (Exception e) {
+                            System.err.println("Error: " + e);
+                        }
+                    } else if (lowerCaseMsg.contains("addfriend@")) {
+                        String msg = msgFromClient.substring(msgFromClient.lastIndexOf("@") + 1);
+                        String username = msg.substring(0, msg.indexOf("?"));
+                        String usernameFr = msg.substring(msg.lastIndexOf("?") + 1);
+                        try {
+                            // System.out.println(username + " .. " + usernameFr);
+                            if (!(new db()).checkUsn(usernameFr)) {
+                                if (!(new db()).isFriend(username, usernameFr)
+                                        && !(new db()).isFriend(usernameFr, username)) {
+                                    if ((new db()).addFriend2Users(username, usernameFr) != 0
+                                            && (new db()).addFriend2Users(usernameFr, username) != 0)
+                                        pw.println("addfriendsuccess");
                                     else
-                                    pw.println("addfriendfail");
+                                        pw.println("addfriendfail");
                                 } else
                                     pw.println("addfriend_isfriend");
                             } else
                                 pw.println("addfriend_wrongusernamme");
-                            
 
-                        } catch(Exception e) {
+                        } catch (Exception e) {
                             System.err.println("Error: " + e);
                         }
-                    }
-                    else if(lowerCaseMsg.contains("unfriend@")) {
+                    } else if (lowerCaseMsg.contains("unfriend@")) {
                         String msg = msgFromClient.substring(msgFromClient.lastIndexOf("@") + 1);
-                        String username = msg.substring(0, msg.indexOf("?") );
-                        String usernameFr = msg.substring(msg.lastIndexOf("?") +1);
+                        String username = msg.substring(0, msg.indexOf("?"));
+                        String usernameFr = msg.substring(msg.lastIndexOf("?") + 1);
                         try {
                             System.out.println(username + "  ..  " + usernameFr);
-                            //check db
-                            if (!(new db()).checkUsn(usernameFr)){
-                                if ((new db()).isFriend(username, usernameFr) && (new db()).isFriend(usernameFr, username)){
-                                    if ((new db()).unFriend2Users(username, usernameFr) != 0  && (new db()).unFriend2Users(usernameFr, username) != 0)
-                                            pw.println("unfriendsuccess");
+                            // check db
+                            if (!(new db()).checkUsn(usernameFr)) {
+                                if ((new db()).isFriend(username, usernameFr)
+                                        && (new db()).isFriend(usernameFr, username)) {
+                                    if ((new db()).unFriend2Users(username, usernameFr) != 0
+                                            && (new db()).unFriend2Users(usernameFr, username) != 0)
+                                        pw.println("unfriendsuccess");
                                     else
-                                    pw.println("unfriendfail");
+                                        pw.println("unfriendfail");
                                 } else
                                     pw.println("unfriend_isnotfriend");
                             } else
                                 pw.println("friend_wrongusernamme");
-                            //send result
+                            // send result
                             // pw.println("unfriendsuccess");
                             // pw.println("unfriendfail");
-                        } catch(Exception e) {
+                        } catch (Exception e) {
                             System.err.println("Error: " + e);
                         }
-                    }
-                    else if (lowerCaseMsg.equals("exit")) {
+                    } else if (lowerCaseMsg.equals("exit")) {
                         // Send end msg to client and noti on server then close client socket
+
                         logHistory.append(" Client (" + client.getInetAddress().getHostAddress()
-                        + ", " + client.getPort() + ") log out \n");
-                        LocalDateTime now = LocalDateTime.now();  
-                        for(int i = 0; i < adminList.size(); i++) {
-                            adminList.get(i).pw.println("set_log@" + dtf.format(now) + ": Client ("+current_user.getName()+", "+current_user.getUsername()+") log out");
+                                + ", " + client.getPort() + ") log out \n");
+                        LocalDateTime now = LocalDateTime.now();
+
+                        (new db()).setOnlineStatus(current_user.getUsername(), "Last online " + dtf.format(now));
+
+                        for (int i = 0; i < adminList.size(); i++) {
+                            adminList.get(i).pw.println("set_log@" + dtf.format(now) + ": Client ("
+                                    + current_user.getName() + ", " + current_user.getUsername() + ") log out");
                         }
                         cr_content.get(Integer.parseInt(this.roomID)).add(this.who + " has left");
                         broadcastMsg(this.roomID, this.who, this.who + " has left");
@@ -469,78 +501,73 @@ import java.util.ArrayList;
                         pw.close();
                         br.close();
                         break;
-                    }
-                    else if (lowerCaseMsg.equals("exit_without_login")) {
+                    } else if (lowerCaseMsg.equals("exit_without_login")) {
                         // Send end msg to client and noti on server then close client socket
                         logHistory.append(" Client (" + client.getInetAddress().getHostAddress()
-                        + ", " + client.getPort() + ") disconnected \n");
+                                + ", " + client.getPort() + ") disconnected \n");
                         client.close();
                         pw.close();
                         br.close();
                         break;
-                    }
-                    else if(lowerCaseMsg.equals("admin_get_alluser")) {
+                    } else if (lowerCaseMsg.equals("admin_get_alluser")) {
                         // Set admin to admin list
                         adminList.add(this);
                         String query = "select * from users";
                         try {
                             ResultSet rs = conn.createStatement().executeQuery(query);
                             pw.println("accepted");
-                            while(rs.next()) {
-                                pw.println(rs.getString("id"));     
-                                pw.println(rs.getString("ban_status"));     
-                                pw.println(rs.getString("name"));    
-                                pw.println(rs.getString("online_status"));  
-                                pw.println(rs.getString("usn"));    
-                                pw.println(rs.getString("psw"));   
-                                pw.println(rs.getString("address"));    
-                                pw.println(rs.getString("dob"));    
-                                pw.println(rs.getString("sex"));    
-                                pw.println(rs.getString("email"));  
-                                pw.println(rs.getString("nofFriends"));     
-                                pw.println(rs.getString("friend"));        
-                                pw.println(rs.getString("createAt"));   
-                                
+                            while (rs.next()) {
+                                pw.println(rs.getString("id"));
+                                pw.println(rs.getString("ban_status"));
+                                pw.println(rs.getString("name"));
+                                pw.println(rs.getString("online_status"));
+                                pw.println(rs.getString("usn"));
+                                pw.println(rs.getString("psw"));
+                                pw.println(rs.getString("address"));
+                                pw.println(rs.getString("dob"));
+                                pw.println(rs.getString("sex"));
+                                pw.println(rs.getString("email"));
+                                pw.println(rs.getString("nofFriends"));
+                                pw.println(rs.getString("friend"));
+                                pw.println(rs.getString("createAt"));
+
                                 this.sendImage(rs.getString("image"));
                                 this.sendImage(rs.getString("bg"));
                                 br.readLine();
                             }
                             pw.println("end");
-                        } catch(SQLException e) {
+                        } catch (SQLException e) {
                             System.err.println("Error admin_get_alluser: " + e);
                         }
-                    }
-                    else if(lowerCaseMsg.equals("admin_exit")) {
+                    } else if (lowerCaseMsg.equals("admin_exit")) {
                         logHistory.append(" Client (" + client.getInetAddress().getHostAddress()
-                        + ", " + client.getPort() + ") log out \n");
+                                + ", " + client.getPort() + ") log out \n");
                         client.close();
                         pw.close();
                         br.close();
                         clientIn.close();
                         clientOut.close();
                         break;
-                    }
-                    else if(lowerCaseMsg.contains("admin_set_user")) {
+                    } else if (lowerCaseMsg.contains("admin_set_user")) {
                         String[] data = msgFromClient.split("&");
 
                         String query = "update users set name='" + data[2] + "',"
-                                        + " usn='" + data[3] + "',"
-                                        + " email='" + data[4] + "',"
-                                        + " address='" + data[5] + "'"
-                                        + " where id='" + data[1] + "';";
+                                + " usn='" + data[3] + "',"
+                                + " email='" + data[4] + "',"
+                                + " address='" + data[5] + "'"
+                                + " where id='" + data[1] + "';";
                         try {
                             conn.prepareStatement(query).execute();
                         } catch (SQLException e) {
                             e.printStackTrace();
                         }
-                    }
-                    else if(lowerCaseMsg.contains("admin_get_all_group_chat")) {
+                    } else if (lowerCaseMsg.contains("admin_get_all_group_chat")) {
                         pw.println("send_all_group_chat_data");
                         String query = "select * from group_chat";
                         try {
                             ResultSet rs = conn.createStatement().executeQuery(query);
                             ArrayList<String> imgs_path = new ArrayList<>();
-                            while(rs.next()) {
+                            while (rs.next()) {
                                 pw.println(rs.getString("id"));
                                 pw.println(rs.getString("group_name"));
                                 pw.println(rs.getString("createdAt"));
@@ -549,34 +576,32 @@ import java.util.ArrayList;
                                 imgs_path.add(rs.getString("image"));
                             }
                             pw.println("end");
-                            for(int i = 0; i < imgs_path.size(); i++) {
+                            for (int i = 0; i < imgs_path.size(); i++) {
                                 this.sendImage(imgs_path.get(i));
                             }
                         } catch (SQLException e) {
                             e.printStackTrace();
                         }
-                    }
-                    else if(lowerCaseMsg.contains("admin_get_group_user@")) {
+                    } else if (lowerCaseMsg.contains("admin_get_group_user@")) {
                         String gr_id = lowerCaseMsg.split("@")[1];
                         pw.println("send_group_user_data");
-                        String query = "call getUsersOfGroup('"+gr_id+"')";
+                        String query = "call getUsersOfGroup('" + gr_id + "')";
                         try {
                             ResultSet rs = conn.createStatement().executeQuery(query);
-                            while(rs.next()) {
+                            while (rs.next()) {
                                 pw.println(rs.getString("user_id"));
                             }
                             pw.println("end");
                         } catch (SQLException e) {
                             e.printStackTrace();
                         }
-                    }
-                    else if(lowerCaseMsg.contains("get_history@")) {
-                        try{ 
+                    } else if (lowerCaseMsg.contains("get_history@")) {
+                        try {
                             String targetId = lowerCaseMsg.split("@")[1];
                             String query = "select * from user_login_history where user_id = '" + targetId + "'";
                             ResultSet rs = conn.createStatement().executeQuery(query);
                             pw.println("send_history@" + targetId);
-                            while(rs.next()) {
+                            while (rs.next()) {
                                 pw.println(rs.getString("his_id"));
                                 pw.println(rs.getString("user_id"));
                                 pw.println(rs.getString("device_name"));
@@ -584,15 +609,15 @@ import java.util.ArrayList;
                                 pw.println(rs.getString("online_status"));
                             }
                             pw.println("end");
-                        } catch(SQLException e) { e.printStackTrace(); }
-                    }
-                    else if(lowerCaseMsg.contains("ban_user@")) {
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    } else if (lowerCaseMsg.contains("ban_user@")) {
                         String target, query;
-                        if(lowerCaseMsg.contains("unban")) {
+                        if (lowerCaseMsg.contains("unban")) {
                             target = lowerCaseMsg.substring(11);
                             query = "update users set ban_status = 'normal' where id = '" + target + "'";
-                        }
-                        else {
+                        } else {
                             target = lowerCaseMsg.substring(9);
                             query = "update users set ban_status = 'ban' where id = '" + target + "'";
                         }
@@ -601,8 +626,7 @@ import java.util.ArrayList;
                         } catch (SQLException e) {
                             e.printStackTrace();
                         }
-                    }
-                    else if(lowerCaseMsg.contains("change_psw_user@")) {
+                    } else if (lowerCaseMsg.contains("change_psw_user@")) {
                         String uid = lowerCaseMsg.split("@")[1];
                         String new_psw = lowerCaseMsg.split("@")[2];
                         String query = "update users set psw = '" + new_psw + "' where id = '" + uid + "'";
@@ -613,37 +637,35 @@ import java.util.ArrayList;
                             System.err.println("Cannot change password");
                             e.printStackTrace();
                         }
-                    }
-                    else if(lowerCaseMsg.contains("get_chat_avt@")) {
+                    } else if (lowerCaseMsg.contains("get_chat_avt@")) {
                         System.out.println("c");
                         String id = msgFromClient.split("@")[1];
                         pw.println("send_chat_avt@" + id);
-                        String query = "call getFriendsAndGroups('"+id+"')";
+                        String query = "call getFriendsAndGroups('" + id + "')";
                         try {
                             ResultSet rs = conn.createStatement().executeQuery(query);
                             ArrayList<String> imgpath_list = new ArrayList<String>();
-                            while(rs.next()) {
+                            while (rs.next()) {
                                 pw.println(rs.getString("id"));
                                 pw.println(rs.getString("name"));
                                 imgpath_list.add(rs.getString("image"));
                             }
                             pw.println("end");
-                            
+
                             // Send avt img
-                            for(int i = 0; i < imgpath_list.size(); i++) {
+                            for (int i = 0; i < imgpath_list.size(); i++) {
                                 this.sendImage(imgpath_list.get(i));
                             }
-                        } catch(SQLException sqle) {
+                        } catch (SQLException sqle) {
                             sqle.printStackTrace();
                         }
-                    }
-                    else if(lowerCaseMsg.contains("get_chat_group_data@")) {
+                    } else if (lowerCaseMsg.contains("get_chat_group_data@")) {
                         String[] dataPackage = msgFromClient.split("@");
                         pw.println("send_chat_data@" + dataPackage[2]);
-                        String query = "call getGroupChatHistory('"+dataPackage[1]+"', '"+dataPackage[2]+"')";
+                        String query = "call getGroupChatHistory('" + dataPackage[1] + "', '" + dataPackage[2] + "')";
                         try {
                             ResultSet rs = conn.createStatement().executeQuery(query);
-                            while(rs.next()) {
+                            while (rs.next()) {
                                 pw.println(rs.getString("send"));
                                 pw.println(rs.getString("sender_name"));
                                 pw.println(rs.getString("receive"));
@@ -655,14 +677,13 @@ import java.util.ArrayList;
                         } catch (SQLException sqle) {
                             sqle.printStackTrace();
                         }
-                    }
-                    else if(lowerCaseMsg.contains("get_chat_private_data@")) {
+                    } else if (lowerCaseMsg.contains("get_chat_private_data@")) {
                         String[] dataPackage = msgFromClient.split("@");
                         pw.println("send_chat_data@" + dataPackage[2]);
-                        String query = "call getPrivateChatHistory('"+dataPackage[1]+"', '"+dataPackage[2]+"')";
+                        String query = "call getPrivateChatHistory('" + dataPackage[1] + "', '" + dataPackage[2] + "')";
                         try {
                             ResultSet rs = conn.createStatement().executeQuery(query);
-                            while(rs.next()) {
+                            while (rs.next()) {
                                 pw.println(rs.getString("send"));
                                 pw.println(rs.getString("sender_name"));
                                 pw.println(rs.getString("receive"));
@@ -676,22 +697,21 @@ import java.util.ArrayList;
                         }
                     }
                 }
-            
+
             } catch (IOException ioe) {
                 System.out.println("Error while comunicating with client" + ioe);
             } catch (NumberFormatException ne) {
                 System.out.println("Error while changing cr_content: " + ne);
             }
         }
-    }  
+    }
 
-     
     public static void main(String args[]) throws Exception {
         // Create the frame on the event dispatching thread.
         SwingUtilities.invokeLater(new Runnable() {
-            public void run() { new Server(); }
+            public void run() {
+                new Server();
+            }
         });
     }
- }
-  
- 
+}

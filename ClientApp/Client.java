@@ -337,6 +337,9 @@ public class Client implements ActionListener {
         // showAction();
         cp.getPrintWriter().println("friendlist@" + usn);
 
+        filterCbb.setActionCommand("friendonline@");
+        filterCbb.addActionListener(this);
+
         addfriendBtn.setActionCommand("addfriend@");
         addfriendBtn.addActionListener(this);
 
@@ -384,7 +387,7 @@ public class Client implements ActionListener {
 
         // set size and location
         headerLabel.setBounds(30, 20, 300, 60);
-        filterLabel.setBounds(180, 30, 300, 40);
+        filterLabel.setBounds(150, 30, 300, 40);
         usernameLabel.setBounds(360, 30, 300, 40);
         addfriendLabel.setBounds(360, 30 + 50 * 3, 300, 40);
         unfriendLabel.setBounds(360, 30 + 50 * 7, 300, 40);
@@ -810,7 +813,13 @@ public class Client implements ActionListener {
                             } else if (command.contains("sending_friend_list")) {
                                 int nofFriend = Integer.valueOf(br.readLine());
                                 System.out.println(nofFriend);
-                                friendTextArea.setText("");
+                                while (nofFriend > 0) {
+                                    friendTextArea.setText(friendTextArea.getText() + br.readLine() + '\n');
+                                    nofFriend--;
+                                }
+                            } else if (command.contains("sending_friend_online")) {
+                                int nofFriend = Integer.valueOf(br.readLine());
+                                System.out.println(nofFriend);
                                 while (nofFriend > 0) {
                                     friendTextArea.setText(friendTextArea.getText() + br.readLine() + '\n');
                                     nofFriend--;
@@ -1011,7 +1020,15 @@ public class Client implements ActionListener {
                     + dobField.getText() + "?" + sex + "?" + emailField.getText() + "?" + passwordField.getText();
             cp.getPrintWriter().println(comStr + msg);
         } else if (comStr.contains("friendlist@")) {
+            friendTextArea.setText("");
             cp.getPrintWriter().println(comStr + usn);
+        } else if (comStr.contains("friendonline@")) {
+            friendTextArea.setText("");
+            if (filterCbb.getSelectedItem().toString().equals("Online")){
+                cp.getPrintWriter().println(comStr + usn);
+            }
+            else
+                cp.getPrintWriter().println("friendlist@" + usn);
         } else if (comStr.contains("addfriend@")) {
             if (addfriendField.getText().equals("")) {
                 JOptionPane.showMessageDialog(signUp, "Input username to add");
