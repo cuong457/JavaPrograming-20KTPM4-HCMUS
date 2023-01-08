@@ -47,7 +47,6 @@ public class Client implements ActionListener {
     String user_id, usn, prevRoom;
 
     JFrame signUp, logIn, friendList;
-    JLabel currentChatFriend;
 
     Client() {
         this.chat_jfrm = new JFrame("Chatting");
@@ -370,16 +369,14 @@ public class Client implements ActionListener {
 		panel_5.setLayout(new BorderLayout(0, 0));
 		
 		JScrollPane scrollPane_1 = new JScrollPane();
-        scrollPane_1.setPreferredSize(new Dimension(400, 400));
+		panel_5.add(scrollPane_1);
 		
 		chatArea = new JTextArea();
         chatArea.setBorder(new EmptyBorder(10, 15, 10, 15));
-        chatArea.setLineWrap(true);
-        chatArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
+		chatArea.setPreferredSize(new Dimension(5, 420));
 		scrollPane_1.setViewportView(chatArea);
-		panel_5.add(scrollPane_1);
-
-		currentChatFriend = new JLabel("");
+		
+		JLabel currentChatFriend = new JLabel("Bạn bè 1");
 		currentChatFriend.setIcon(new ImageIcon("E:\\java - dh\\final project\\ChatPrivateUI\\src\\user2.png"));
 		currentChatFriend.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		currentChatFriend.setPreferredSize(new Dimension(43, 60));
@@ -643,20 +640,8 @@ public class Client implements ActionListener {
                             chatArea.append("You: " + current_chat_data.get(i).get("message") + "\n");
                         }
                         else {
-                            chatArea.append(current_chat_data.get(i).get("sender_name") + ": " +
+                            chatArea.append(current_chat_data.get(i).get("send") + ": " +
                                     current_chat_data.get(i).get("message") + "\n");
-                        }
-                    }
-
-                    // SET TITLE
-                    for(String k : chat_partner.keySet()) {
-                        System.out.println("Check: " + k + "---" + current_chat_target);
-                        if((k).equals(current_chat_target)) {
-                            System.out.println(chat_partner.get(k));
-                            currentChatFriend.setText(chat_partner.get(k));
-                            friendList.revalidate();
-                            friendList.repaint();
-                            break;
                         }
                     }
                 }
@@ -810,13 +795,7 @@ public class Client implements ActionListener {
                                     c.put("send", m);
 
                                     m=br.readLine();
-                                    c.put("sender_name", m);
-
-                                    m=br.readLine();
                                     c.put("receive", m);
-
-                                    m=br.readLine();
-                                    c.put("receiver_name", m);
 
                                     m=br.readLine();
                                     c.put("message", m);
@@ -830,16 +809,7 @@ public class Client implements ActionListener {
                             else if(command.contains("set_chat@")) {
                                 String[] dataPackage = command.split("@");
                                 if(current_chat_target.equals(dataPackage[1])) {
-                                    for(int i = 0; i < chat_history_list.size(); i++) {
-                                        if((chat_history_list.get(i).get("send")).equals(dataPackage[3])) {
-                                            chatArea.append(chat_history_list.get(i).get("sender_name") + ": " + dataPackage[2] + "\n");
-                                            break;
-                                        }
-                                        else if((chat_history_list.get(i).get("receive")).equals(dataPackage[3])) {
-                                            chatArea.append(chat_history_list.get(i).get("receiver_name") + ": " + dataPackage[2] + "\n");
-                                            break;
-                                        }
-                                    }
+                                    chatArea.append(dataPackage[2] + "\n");
                                 }
                             }
                         }

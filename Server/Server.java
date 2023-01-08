@@ -8,6 +8,7 @@
  */
 
 import javax.swing.*;
+import javax.swing.GroupLayout.Group;
 import javax.swing.border.EmptyBorder;
 
 import java.awt.*;
@@ -26,6 +27,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
  
   
@@ -238,7 +241,8 @@ import java.util.ArrayList;
         // Entry point of thread.
         public void run() {
             // Wait for the data from the client and reply
-            
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");  
+                        
             try {
                 while(true) {
                     // Read data from the client
@@ -290,13 +294,34 @@ import java.util.ArrayList;
                         }
                     }
                     else if(lowerCaseMsg.contains("chat@")) {
-                        String msg = msgFromClient.substring(msgFromClient.lastIndexOf("@") + 1);
-                        try {
-                            cr_content.get(Integer.parseInt(this.roomID)).add(who + ": " + msg);
-                            broadcastMsg(this.roomID, this.who, who + ": " + msg);
-                        } catch(Exception e) {
-                            System.err.println("Error chat receiver: " + e);
+                        String[] dataPackage = msgFromClient.split("@");
+                        // UPDATE IN DATABASE
+                        LocalDateTime now = LocalDateTime.now();  
+                        String query = "insert into chat_history values ('" + dataPackage[1] 
+                                    + "', '"+ dataPackage[2] +"', '"+ dataPackage[3] +"', '" + dtf.format(now) + "')";
+                        try{
+                            conn.prepareStatement(query).execute(); 
+                        } catch(SQLException sqle) {
+                            sqle.printStackTrace();
                         }
+
+                        // BROADCAST TO CURRENT ONLINE MEMBER
+                            // If send to group
+                        if(dataPackage[2].contains("group")) {
+                            for(int i = 0; i < clientList.size(); i++) {
+                                System.out.println("Check: " + dataPackage[1] + "----" + clientList.get(i).who);
+                                if(!dataPackage[1].equals(clientList.get(i).who))
+                                    clientList.get(i).pw.println("set_chat@"+dataPackage[2]+"@"+dataPackage[3] + "@" + dataPackage[1]);
+                            }
+                        }
+                            // If send to user
+                        else {
+                            System.out.println("private");
+                            for(int i = 0; i < clientList.size(); i++) {
+                                clientList.get(i).pw.println("set_chat@"+dataPackage[1]+"@"+dataPackage[3] + "@" + dataPackage[1]);
+                            }
+                        }
+                        
                     }
                     else if(lowerCaseMsg.contains("login@")) {
                         String msg = msgFromClient.substring(msgFromClient.lastIndexOf("@") + 1);
@@ -308,13 +333,26 @@ import java.util.ArrayList;
                             //check db
                             if ((new db()).accountVerification(username, password)){
                                 current_user = (new db()).getUserByUsername(username);
-                                System.out.print(current_user.getName());
-                                pw.println("loginsuccess");
+                                pw.println("loginsuccess@" + current_user.getId());
+                                who=current_user.getId();
+                                LocalDateTime now = LocalDateTime.now();  
                                 for(int i = 0; i < adminList.size(); i++) {
-                                    adminList.get(i).pw.println("set_log@" + " Client () log in");
+                                    adminList.get(i).pw.println("set_log@" + dtf.format(now) + ": Client ("+current_user.getName()+", "+current_user.getUsername()+") log in");
                                 }
                                 logHistory.append(" Client (" + client.getInetAddress().getHostAddress()
                                 + ", " + client.getPort() + ") log in \n");
+
+                                // Send chat history
+                                String query = "call getAllHistory('" + current_user.getId() +"')";
+                                ResultSet rs = conn.createStatement().executeQuery(query);
+                                while(rs.next()) {
+                                    pw.println(rs.getString("send"));
+                                    pw.println(rs.getString("sender_name"));
+                                    pw.println(rs.getString("receive"));
+                                    pw.println(rs.getString("receiver_name"));
+                                    pw.println(rs.getString("message"));
+                                }
+                                pw.println("end");
                             }
                             else
                                 pw.println("loginfail");
@@ -421,12 +459,21 @@ import java.util.ArrayList;
                         // Send end msg to client and noti on server then close client socket
                         logHistory.append(" Client (" + client.getInetAddress().getHostAddress()
                         + ", " + client.getPort() + ") log out \n");
+                        LocalDateTime now = LocalDateTime.now();  
                         for(int i = 0; i < adminList.size(); i++) {
-                            adminList.get(i).pw.println("set_log@" + " Client (" + client.getInetAddress().getHostAddress()
-                            + ", " + client.getPort() + ") log out");
+                            adminList.get(i).pw.println("set_log@" + dtf.format(now) + ": Client ("+current_user.getName()+", "+current_user.getUsername()+") log out");
                         }
                         cr_content.get(Integer.parseInt(this.roomID)).add(this.who + " has left");
                         broadcastMsg(this.roomID, this.who, this.who + " has left");
+                        client.close();
+                        pw.close();
+                        br.close();
+                        break;
+                    }
+                    else if (lowerCaseMsg.equals("exit_without_login")) {
+                        // Send end msg to client and noti on server then close client socket
+                        logHistory.append(" Client (" + client.getInetAddress().getHostAddress()
+                        + ", " + client.getPort() + ") disconnected \n");
                         client.close();
                         pw.close();
                         br.close();
@@ -565,6 +612,66 @@ import java.util.ArrayList;
                         } catch (SQLException e) {
                             System.err.println("Cannot change password");
                             e.printStackTrace();
+                        }
+                    }
+                    else if(lowerCaseMsg.contains("get_chat_avt@")) {
+                        String id = msgFromClient.split("@")[1];
+                        pw.println("send_chat_avt@" + id);
+                        String query = "call getFriendsAndGroups('"+id+"')";
+                        try {
+                            ResultSet rs = conn.createStatement().executeQuery(query);
+                            ArrayList<String> imgpath_list = new ArrayList<String>();
+                            while(rs.next()) {
+                                pw.println(rs.getString("id"));
+                                pw.println(rs.getString("name"));
+                                imgpath_list.add(rs.getString("image"));
+                            }
+                            pw.println("end");
+                            
+                            // Send avt img
+                            for(int i = 0; i < imgpath_list.size(); i++) {
+                                this.sendImage(imgpath_list.get(i));
+                            }
+                        } catch(SQLException sqle) {
+                            sqle.printStackTrace();
+                        }
+                    }
+                    else if(lowerCaseMsg.contains("get_chat_group_data@")) {
+                        String[] dataPackage = msgFromClient.split("@");
+                        pw.println("send_chat_data@" + dataPackage[2]);
+                        String query = "call getGroupChatHistory('"+dataPackage[1]+"', '"+dataPackage[2]+"')";
+                        try {
+                            ResultSet rs = conn.createStatement().executeQuery(query);
+                            while(rs.next()) {
+                                pw.println(rs.getString("send"));
+                                pw.println(rs.getString("sender_name"));
+                                pw.println(rs.getString("receive"));
+                                pw.println(rs.getString("receiver_name"));
+                                pw.println(rs.getString("message"));
+                                pw.println(rs.getString("send_at"));
+                            }
+                            pw.println("end");
+                        } catch (SQLException sqle) {
+                            sqle.printStackTrace();
+                        }
+                    }
+                    else if(lowerCaseMsg.contains("get_chat_private_data@")) {
+                        String[] dataPackage = msgFromClient.split("@");
+                        pw.println("send_chat_data@" + dataPackage[2]);
+                        String query = "call getPrivateChatHistory('"+dataPackage[1]+"', '"+dataPackage[2]+"')";
+                        try {
+                            ResultSet rs = conn.createStatement().executeQuery(query);
+                            while(rs.next()) {
+                                pw.println(rs.getString("send"));
+                                pw.println(rs.getString("sender_name"));
+                                pw.println(rs.getString("receive"));
+                                pw.println(rs.getString("receiver_name"));
+                                pw.println(rs.getString("message"));
+                                pw.println(rs.getString("send_at"));
+                            }
+                            pw.println("end");
+                        } catch (SQLException sqle) {
+                            sqle.printStackTrace();
                         }
                     }
                 }

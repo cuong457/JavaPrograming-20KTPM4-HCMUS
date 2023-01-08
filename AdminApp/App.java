@@ -137,6 +137,7 @@ public class App implements ActionListener {
         seeGroupChat.addActionListener(this);
         monitor = new JTextArea();
         monitor.setEditable(false);
+        monitor.setLineWrap(true);
         monitorPnl.add(title, BorderLayout.NORTH);
         monitorPnl.add(monitor, BorderLayout.CENTER);
         monitorPnl.add(seeGroupChat, BorderLayout.SOUTH);
@@ -1225,7 +1226,16 @@ public class App implements ActionListener {
         sortOptionPnl.add(sortGroupInput);
         sortOptionPnl.add(sortGroupOrderInput);
 
+        JButton backtoHome = new JButton("< Back");
+        backtoHome.setActionCommand("back_from_grouplist_to_home");
+        backtoHome.addActionListener(this);
+
             // ADD TO MAIN LEFT PANEL
+        JPanel btn_wrap = new JPanel();
+        btn_wrap.setLayout(new BorderLayout());
+        btn_wrap.setMaximumSize(new Dimension(400, 30));
+        btn_wrap.add(backtoHome, BorderLayout.WEST);
+        groupListPanel.add(btn_wrap);
         groupListPanel.add(title_wrap);
         subMainLeft = new JPanel();
         subMainLeft.setLayout(new BoxLayout(subMainLeft, BoxLayout.Y_AXIS));
@@ -1837,6 +1847,15 @@ public class App implements ActionListener {
             }
             this.showMemberGroup();
             this.showAdminGroup(gr_id);
+        }
+        else if(comStr.equals("back_from_grouplist_to_home")) {
+            // UNDISPLAY GROUP
+            jfrm.getContentPane().removeAll();
+            jfrm.getContentPane().add(homePnl);
+            jfrm.getContentPane().add(monitorPnl);
+            monitorPnl.setVisible(true);
+            homePnl.setVisible(true);
+            jfrm.repaint();
         }
     }
     public static void main(String args[]) {
