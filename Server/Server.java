@@ -56,7 +56,7 @@ import java.util.ArrayList;
     // Database config
     private String DB_URL = "jdbc:mysql://localhost:3306/java_chatting_app";
     private String USER_NAME = "root";
-    private String PASSWORD = "Duongminh410";
+    private String PASSWORD = "12345";
     Connection conn = null;
     user current_user = null;
   
@@ -615,6 +615,7 @@ import java.util.ArrayList;
                         }
                     }
                     else if(lowerCaseMsg.contains("get_chat_avt@")) {
+                        System.out.println("c");
                         String id = msgFromClient.split("@")[1];
                         pw.println("send_chat_avt@" + id);
                         String query = "call getFriendsAndGroups('"+id+"')";

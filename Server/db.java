@@ -20,7 +20,7 @@ public class db {
     static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
     static final String DB_URL = "jdbc:mysql://localhost/java_chatting_app";
     static final String USER = "root";
-    static final String PASS = "Duongminh410";
+    static final String PASS = "12345";
 
     public db(){}
 

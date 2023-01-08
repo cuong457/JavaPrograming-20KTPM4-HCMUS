@@ -25,13 +25,16 @@ public class Client implements ActionListener {
     ArrayList<ArrayList<String>> chatrooms;
 
     JPanel currenUser, prevUserPanel, chatPanel, chatSide;
-    JLabel headerLabel, usernameLabel, fullnameLabel, addressLabel, dobLabel, emailLabel, passwordLabel, sexLabel, addfriendLabel, unfriendLabel;
-    JTextField inputField, usernameField, fullnameField, addressField, dobField, emailField, passwordField, addfriendField, unfriendField;
+    JLabel headerLabel, usernameLabel, fullnameLabel, addressLabel, dobLabel, emailLabel, passwordLabel, sexLabel,
+            addfriendLabel, unfriendLabel, filterLabel;
+    JTextField inputField, usernameField, fullnameField, addressField, dobField, emailField, passwordField,
+            addfriendField, unfriendField;
     JTextArea ta_chat, friendTextArea;
-    JButton loginBtn, signupBtn, resetPasswordBtn, addfriendBtn, unfriendBtn;
+    JButton loginBtn, signupBtn, resetPasswordBtn, addfriendBtn, unfriendBtn, backBtn;
     ButtonGroup sexBtnGroup;
     JRadioButton maleRadioButton, femaleRadioButton;
     JScrollPane friendScrollPane;
+    JComboBox filterCbb;
     private List<String> friendStrList;
     boolean is_login_success = false;
     String current_chat_target = "";
@@ -46,7 +49,7 @@ public class Client implements ActionListener {
 
     String user_id, usn, prevRoom;
 
-    JFrame signUp, logIn, friendList;
+    JFrame signUp, logIn, friendList, friendFrm;
     JLabel currentChatFriend;
 
     Client() {
@@ -75,6 +78,7 @@ public class Client implements ActionListener {
         this.signUp = new JFrame("Sign up");
         this.logIn = new JFrame("Log in");
         this.friendList = new JFrame("Friend List");
+        this.friendFrm = new JFrame("Friend");
         login();
     }
 
@@ -271,7 +275,146 @@ public class Client implements ActionListener {
         signUp.setVisible(true);
     }
 
-    void friendlist(){
+    void Friend() {
+
+        friendFrm.setLayout(null);
+        friendFrm.setResizable(false);
+        friendFrm.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                cp.getPrintWriter().println("exit");
+                try {
+                    client.close();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                System.exit(0);
+            }
+        });
+
+        friendFrm.setSize(720, 720);
+        friendFrm.setLocationRelativeTo(null);
+        friendFrm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        headerLabel = new JLabel("Friend");
+        filterLabel = new JLabel("Filter");
+        usernameLabel = new JLabel("Your username");
+        addfriendLabel = new JLabel("Add friend by username");
+        unfriendLabel = new JLabel("Unfriend by username");
+
+        String status[] = { "All friends", "Online" };
+        filterCbb = new JComboBox<>(status);
+
+        usernameField = new JTextField(15);
+        addfriendField = new JTextField(15);
+        unfriendField = new JTextField(15);
+
+        addfriendBtn = new JButton("Add friend");
+        unfriendBtn = new JButton("Unfriend");
+        backBtn = new JButton("Back");
+
+        friendTextArea = new JTextArea(16, 16);
+        friendScrollPane = new JScrollPane(friendTextArea);
+
+        friendStrList = new ArrayList<String>();
+
+        // set font
+        headerLabel.setFont(new Font("Arial", Font.PLAIN, 28));
+        filterLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        usernameLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        addfriendLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        unfriendLabel.setFont(new Font("Arial", Font.PLAIN, 20));
+        usernameField.setFont(new Font("Arial", Font.PLAIN, 18));
+        addfriendField.setFont(new Font("Arial", Font.PLAIN, 18));
+        unfriendField.setFont(new Font("Arial", Font.PLAIN, 17));
+        addfriendBtn.setFont(new Font("Arial", Font.BOLD, 17));
+        unfriendBtn.setFont(new Font("Arial", Font.BOLD, 18));
+        backBtn.setFont(new Font("Arial", Font.BOLD, 18));
+        friendTextArea.setFont(new Font("Arial", Font.PLAIN, 18));
+
+        // add action
+        // showAction();
+        cp.getPrintWriter().println("friendlist@" + usn);
+
+        addfriendBtn.setActionCommand("addfriend@");
+        addfriendBtn.addActionListener(this);
+
+        unfriendBtn.setActionCommand("unfriend@");
+        unfriendBtn.addActionListener(this);
+
+        backBtn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                friendFrm.setVisible(false);
+                friendList.setVisible(true);
+            }
+        });
+
+        // add to frame
+        friendFrm.add(headerLabel);
+        friendFrm.add(filterLabel);
+        friendFrm.add(usernameLabel);
+        friendFrm.add(addfriendLabel);
+        friendFrm.add(filterCbb);
+        friendFrm.add(unfriendLabel);
+        friendFrm.add(usernameField);
+        friendFrm.add(addfriendField);
+        friendFrm.add(unfriendField);
+        friendFrm.add(addfriendBtn);
+        friendFrm.add(unfriendBtn);
+        friendFrm.add(backBtn);
+        friendFrm.add(friendTextArea);
+        friendFrm.add(friendScrollPane);
+
+        // set color
+        addfriendBtn.setBackground(new Color(103, 201, 250));
+        addfriendBtn.setOpaque(true);
+
+        unfriendBtn.setBackground(new Color(255, 84, 84));
+        unfriendBtn.setOpaque(true);
+
+        backBtn.setBackground(new Color(255, 234, 84));
+        backBtn.setOpaque(true);
+
+        friendTextArea.setBackground(new Color(246, 250, 142));
+        friendTextArea.setOpaque(true);
+
+        // set scrollpane
+        friendScrollPane.setViewportView(friendTextArea);
+
+        // set size and location
+        headerLabel.setBounds(30, 20, 300, 60);
+        filterLabel.setBounds(180, 30, 300, 40);
+        usernameLabel.setBounds(360, 30, 300, 40);
+        addfriendLabel.setBounds(360, 30 + 50 * 3, 300, 40);
+        unfriendLabel.setBounds(360, 30 + 50 * 7, 300, 40);
+
+        filterCbb.setBounds(220, 30, 120, 40);
+
+        usernameField.setBounds(360, 30 + 50, 300, 40);
+        addfriendField.setBounds(360, 30 + 50 * 4, 300, 40);
+        unfriendField.setBounds(360, 30 + 50 * 8, 300, 40);
+
+        addfriendBtn.setBounds(360, 30 + 50 * 5, 300, 40);
+        unfriendBtn.setBounds(360, 30 + 50 * 9, 300, 40);
+        backBtn.setBounds(360, 30 + 50 * 11, 300, 40);
+
+        friendScrollPane.setBounds(30, 20 + 60, 300, 560);
+
+        friendTextArea.setBounds(30, 20 + 60, 300, 560);
+
+        // set text field enabled
+        usernameField.setEnabled(false);
+        friendTextArea.setEditable(false);
+
+        // just for username of current user
+        usernameField.setText(usn);
+
+        friendFrm.setVisible(true);
+
+    }
+
+    void friendlist() {
         // DECLARE FRAME
         friendList.setLayout(null);
         friendList.setResizable(false);
@@ -281,7 +424,8 @@ public class Client implements ActionListener {
                 cp.getPrintWriter().println("exit");
                 try {
                     client.close();
-                } catch(IOException ioe) {}
+                } catch (IOException ioe) {
+                }
                 System.exit(0);
             }
         });
@@ -295,164 +439,166 @@ public class Client implements ActionListener {
         JTextField searchHistoryInput;
         JTextField messageInput;
 
-		friendList.setBounds(100, 100, 985, 688);
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        friendList.setBounds(100, 100, 985, 688);
+        contentPane = new JPanel();
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-		friendList.setContentPane(contentPane);
-		contentPane.setLayout(new BorderLayout(0, 0));
-		
-		JPanel panel = new JPanel();
-		panel.setBackground(new Color(255, 255, 255));
-		panel.setPreferredSize(new Dimension(300, 10));
-		contentPane.add(panel, BorderLayout.WEST);
-		
-		JScrollPane friendScrollPane = new JScrollPane();
-		friendScrollPane.setBackground(new Color(255, 255, 255));
-		friendScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		friendScrollPane.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-		friendScrollPane.setPreferredSize(new Dimension(300, 460));
-		panel.add(friendScrollPane);
-		
-		JLabel lblNewLabel_1 = new JLabel("Chat");
-		lblNewLabel_1.setBackground(new Color(64, 128, 128));
-		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel_1.setFont(new Font("Tahoma", Font.BOLD, 16));
-		friendScrollPane.setColumnHeaderView(lblNewLabel_1);
-		
-		JPanel friendPanel = new JPanel();
-		friendPanel.setPreferredSize(new Dimension(280, 2000));
-		friendPanel.setBackground(new Color(255, 255, 255));
-		friendScrollPane.setViewportView(friendPanel);
-		friendPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
-		
+        friendList.setContentPane(contentPane);
+        contentPane.setLayout(new BorderLayout(0, 0));
+
+        JPanel panel = new JPanel();
+        panel.setBackground(new Color(255, 255, 255));
+        panel.setPreferredSize(new Dimension(300, 10));
+        contentPane.add(panel, BorderLayout.WEST);
+
+        JScrollPane friendScrollPane = new JScrollPane();
+        friendScrollPane.setBackground(new Color(255, 255, 255));
+        friendScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        friendScrollPane.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
+        friendScrollPane.setPreferredSize(new Dimension(300, 460));
+        panel.add(friendScrollPane);
+
+        JLabel lblNewLabel_1 = new JLabel("Chat");
+        lblNewLabel_1.setBackground(new Color(64, 128, 128));
+        lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
+        lblNewLabel_1.setFont(new Font("Tahoma", Font.BOLD, 16));
+        friendScrollPane.setColumnHeaderView(lblNewLabel_1);
+
+        JPanel friendPanel = new JPanel();
+        friendPanel.setPreferredSize(new Dimension(280, 2000));
+        friendPanel.setBackground(new Color(255, 255, 255));
+        friendScrollPane.setViewportView(friendPanel);
+        friendPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+
         // RENDER USER BUTTON
-		JButton[] fr_btn = this.generateUserPanelFromChatHis();
+        JButton[] fr_btn = this.generateUserPanelFromChatHis();
         this.renderPanel(friendPanel, fr_btn);
-		
-		JPanel functionPanel = new JPanel();
-		functionPanel.setPreferredSize(new Dimension(280, 140));
-		panel.add(functionPanel);
-		
-		JButton viewListFriendButton = new JButton("Danh sách bạn bè");
-		viewListFriendButton.setBackground(new Color(0, 255, 255));
-		viewListFriendButton.setHorizontalTextPosition(SwingConstants.CENTER);
-		viewListFriendButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-		functionPanel.setLayout(new GridLayout(0, 2, 0, 0));
-		functionPanel.add(viewListFriendButton);
-		
-		JButton createGroupButton = new JButton("Tạo nhóm");
-		createGroupButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
 
-			}
-		});
-		createGroupButton.setBackground(new Color(0, 255, 255));
-		functionPanel.add(createGroupButton);
-		
-		JButton btnNewButton_5 = new JButton("New button");
-		btnNewButton_5.setBackground(new Color(0, 255, 255));
-		functionPanel.add(btnNewButton_5);
-		
-		JButton btnNewButton_6 = new JButton("New button");
-		btnNewButton_6.setBackground(new Color(0, 255, 255));
-		functionPanel.add(btnNewButton_6);
-		
-		JPanel panel_1 = new JPanel();
-		panel_1.setPreferredSize(new Dimension(650, 10));
-		contentPane.add(panel_1, BorderLayout.EAST);
-		panel_1.setLayout(new BorderLayout(0, 0));
-		
-		JPanel panel_5 = new JPanel();
-		panel_1.add(panel_5, BorderLayout.NORTH);
-		panel_5.setLayout(new BorderLayout(0, 0));
-		
-		JScrollPane scrollPane_1 = new JScrollPane();
+        JPanel functionPanel = new JPanel();
+        functionPanel.setPreferredSize(new Dimension(280, 140));
+        panel.add(functionPanel);
+
+        JButton viewListFriendButton = new JButton("Danh sách bạn bè");
+        viewListFriendButton.setBackground(new Color(0, 255, 255));
+        viewListFriendButton.setHorizontalTextPosition(SwingConstants.CENTER);
+        viewListFriendButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                friendList.setVisible(false);
+                Friend();
+            }
+        });
+        functionPanel.setLayout(new GridLayout(0, 2, 0, 0));
+        functionPanel.add(viewListFriendButton);
+
+        JButton createGroupButton = new JButton("Tạo nhóm");
+        createGroupButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+        createGroupButton.setBackground(new Color(0, 255, 255));
+        functionPanel.add(createGroupButton);
+
+        JButton btnNewButton_5 = new JButton("New button");
+        btnNewButton_5.setBackground(new Color(0, 255, 255));
+        functionPanel.add(btnNewButton_5);
+
+        JButton btnNewButton_6 = new JButton("New button");
+        btnNewButton_6.setBackground(new Color(0, 255, 255));
+        functionPanel.add(btnNewButton_6);
+
+        JPanel panel_1 = new JPanel();
+        panel_1.setPreferredSize(new Dimension(650, 10));
+        contentPane.add(panel_1, BorderLayout.EAST);
+        panel_1.setLayout(new BorderLayout(0, 0));
+
+        JPanel panel_5 = new JPanel();
+        panel_1.add(panel_5, BorderLayout.NORTH);
+        panel_5.setLayout(new BorderLayout(0, 0));
+
+        JScrollPane scrollPane_1 = new JScrollPane();
         scrollPane_1.setPreferredSize(new Dimension(400, 400));
-		
-		chatArea = new JTextArea();
+
+        chatArea = new JTextArea();
         chatArea.setBorder(new EmptyBorder(10, 15, 10, 15));
         chatArea.setLineWrap(true);
         chatArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
-		scrollPane_1.setViewportView(chatArea);
-		panel_5.add(scrollPane_1);
+        scrollPane_1.setViewportView(chatArea);
+        panel_5.add(scrollPane_1);
 
-		currentChatFriend = new JLabel("");
-		currentChatFriend.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		currentChatFriend.setPreferredSize(new Dimension(43, 60));
-		panel_5.add(currentChatFriend, BorderLayout.NORTH);
-		
-		JPanel panel_3 = new JPanel();
-		panel_5.add(panel_3, BorderLayout.SOUTH);
-		panel_3.setLayout(new BorderLayout(0, 0));
-		
-		messageInput = new JTextField();
-		panel_3.add(messageInput);
-		messageInput.setColumns(10);
-		
-		JButton sendMessageButton = new JButton("Gửi tin");
-		sendMessageButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+        currentChatFriend = new JLabel("");
+        currentChatFriend.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        currentChatFriend.setPreferredSize(new Dimension(43, 60));
+        panel_5.add(currentChatFriend, BorderLayout.NORTH);
+
+        JPanel panel_3 = new JPanel();
+        panel_5.add(panel_3, BorderLayout.SOUTH);
+        panel_3.setLayout(new BorderLayout(0, 0));
+
+        messageInput = new JTextField();
+        panel_3.add(messageInput);
+        messageInput.setColumns(10);
+
+        JButton sendMessageButton = new JButton("Gửi tin");
+        sendMessageButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
                 String m = messageInput.getText().trim();
-                if(!(m.equals(""))) {
+                if (!(m.equals(""))) {
                     // WORKING WITH LOCAL
                     messageInput.setText("");
                     chatArea.append("You: " + m + "\n");
-                    
+
                     // WORKING WITH SERVER
                     cp.getPrintWriter().println("chat@" + user_id + "@" + current_chat_target + "@" + m);
                 }
-			}
-		});
-		sendMessageButton.setBackground(new Color(0, 255, 255));
-		panel_3.add(sendMessageButton, BorderLayout.EAST);
-		
-		JPanel panel_6 = new JPanel();
-		panel_1.add(panel_6, BorderLayout.CENTER);
-		
-		JButton deleteHistoryButton = new JButton("Xóa lịch sử chat");
-		deleteHistoryButton.setBackground(new Color(0, 255, 255));
-		deleteHistoryButton.setBounds(23, 20, 137, 31);
-		deleteHistoryButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+            }
+        });
+        sendMessageButton.setBackground(new Color(0, 255, 255));
+        panel_3.add(sendMessageButton, BorderLayout.EAST);
 
-			}
-		});
-		panel_6.setLayout(null);
-		panel_6.add(deleteHistoryButton);
-		
-		searchHistoryInput = new JTextField();
-		searchHistoryInput.setBounds(23, 84, 327, 48);
-		searchHistoryInput.setPreferredSize(new Dimension(2000, 30));
-		panel_6.add(searchHistoryInput);
-		searchHistoryInput.setColumns(10);
-		
-		JButton sendSearchHistoryButton = new JButton("Tìm");
-		sendSearchHistoryButton.setBackground(new Color(0, 128, 192));
-		sendSearchHistoryButton.setForeground(new Color(255, 255, 255));
-		sendSearchHistoryButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-		sendSearchHistoryButton.setBounds(362, 80, 74, 52);
-		panel_6.add(sendSearchHistoryButton);
-		
-		JButton deleteHistoryButton2 = new JButton("Xóa lịch sử chat2");
-		deleteHistoryButton2.setBackground(new Color(0, 255, 255));
-		deleteHistoryButton2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-		deleteHistoryButton2.setBounds(170, 20, 136, 31);
-		panel_6.add(deleteHistoryButton2);
-		
-		JLabel lblNewLabel = new JLabel("Tìm kiếm");
-		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblNewLabel.setBounds(23, 61, 79, 13);
-		panel_6.add(lblNewLabel);
+        JPanel panel_6 = new JPanel();
+        panel_1.add(panel_6, BorderLayout.CENTER);
+
+        JButton deleteHistoryButton = new JButton("Xóa lịch sử chat");
+        deleteHistoryButton.setBackground(new Color(0, 255, 255));
+        deleteHistoryButton.setBounds(23, 20, 137, 31);
+        deleteHistoryButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+
+            }
+        });
+        panel_6.setLayout(null);
+        panel_6.add(deleteHistoryButton);
+
+        searchHistoryInput = new JTextField();
+        searchHistoryInput.setBounds(23, 84, 327, 48);
+        searchHistoryInput.setPreferredSize(new Dimension(2000, 30));
+        panel_6.add(searchHistoryInput);
+        searchHistoryInput.setColumns(10);
+
+        JButton sendSearchHistoryButton = new JButton("Tìm");
+        sendSearchHistoryButton.setBackground(new Color(0, 128, 192));
+        sendSearchHistoryButton.setForeground(new Color(255, 255, 255));
+        sendSearchHistoryButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+        sendSearchHistoryButton.setBounds(362, 80, 74, 52);
+        panel_6.add(sendSearchHistoryButton);
+
+        JButton deleteHistoryButton2 = new JButton("Xóa lịch sử chat2");
+        deleteHistoryButton2.setBackground(new Color(0, 255, 255));
+        deleteHistoryButton2.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            }
+        });
+        deleteHistoryButton2.setBounds(170, 20, 136, 31);
+        panel_6.add(deleteHistoryButton2);
+
+        JLabel lblNewLabel = new JLabel("Tìm kiếm");
+        lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        lblNewLabel.setBounds(23, 61, 79, 13);
+        panel_6.add(lblNewLabel);
 
         // SET MAIN FRAME TRUE
         friendList.setVisible(true);
@@ -502,7 +648,7 @@ public class Client implements ActionListener {
         // chat_avt: id-image, chat_partner: id-name
         cp.getPrintWriter().println("get_chat_avt@" + user_id);
         // GET IMAGE FROM SERVER
-        while(chat_avt == null) {
+        while (chat_avt == null) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -516,7 +662,8 @@ public class Client implements ActionListener {
         int i = 0;
         for (String usid : chat_avt.keySet()) {
             // Scale the original image
-            ImageIcon scaledIcon = new ImageIcon(chat_avt.get(usid).getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH));
+            ImageIcon scaledIcon = new ImageIcon(
+                    chat_avt.get(usid).getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH));
 
             JButton btn_user = new JButton(scaledIcon);
             btn_user.setText(chat_partner.get(usid));
@@ -534,33 +681,31 @@ public class Client implements ActionListener {
                     current_chat_target = usid;
 
                     // GET CHAT DATA FROM SERVER
-                    if(current_chat_target.contains("group")) {
-                        cp.getPrintWriter().println("get_chat_group_data@"+user_id+"@"+current_chat_target);
-                    }
-                    else {
-                        cp.getPrintWriter().println("get_chat_private_data@"+user_id+"@"+current_chat_target);
+                    if (current_chat_target.contains("group")) {
+                        cp.getPrintWriter().println("get_chat_group_data@" + user_id + "@" + current_chat_target);
+                    } else {
+                        cp.getPrintWriter().println("get_chat_private_data@" + user_id + "@" + current_chat_target);
                     }
                     while (current_chat_data.size() <= 0) {
                         try {
                             Thread.sleep(100);
-                        } catch(InterruptedException ie) {
+                        } catch (InterruptedException ie) {
                             ie.printStackTrace();
                         }
                     }
-                    for(int i = 0; i < current_chat_data.size(); i++) {
-                        if((current_chat_data.get(i).get("send")).equals(user_id)) {
+                    for (int i = 0; i < current_chat_data.size(); i++) {
+                        if ((current_chat_data.get(i).get("send")).equals(user_id)) {
                             chatArea.append("You: " + current_chat_data.get(i).get("message") + "\n");
-                        }
-                        else {
+                        } else {
                             chatArea.append(current_chat_data.get(i).get("sender_name") + ": " +
                                     current_chat_data.get(i).get("message") + "\n");
                         }
                     }
 
                     // SET TITLE
-                    for(String k : chat_partner.keySet()) {
+                    for (String k : chat_partner.keySet()) {
                         System.out.println("Check: " + k + "---" + current_chat_target);
-                        if((k).equals(current_chat_target)) {
+                        if ((k).equals(current_chat_target)) {
                             System.out.println(chat_partner.get(k));
                             currentChatFriend.setText(chat_partner.get(k));
                             currentChatFriend.setIcon(new ImageIcon(ScaleImage(chat_avt.get(k).getImage(), 50, 50)));
@@ -598,7 +743,6 @@ public class Client implements ActionListener {
                 InputStream clientIn = client.getInputStream();
                 br = new BufferedReader(new InputStreamReader(clientIn));
 
-
                 // Set username
                 pw.println("usn@" + usn);
 
@@ -632,121 +776,121 @@ public class Client implements ActionListener {
                                 chatSide.repaint();
                             } else if (command.contains("loginsuccess@")) {
                                 String m;
-                                while(!(m = br.readLine()).equals("end")) {
+                                while (!(m = br.readLine()).equals("end")) {
                                     Map<String, String> ch = new HashMap<String, String>();
                                     ch.put("send", m);
 
-                                    m=br.readLine();
+                                    m = br.readLine();
                                     ch.put("sender_name", m);
 
-                                    m=br.readLine();
+                                    m = br.readLine();
                                     ch.put("receive", m);
-                                    
-                                    m=br.readLine();
+
+                                    m = br.readLine();
                                     ch.put("receiver_name", m);
 
-                                    m=br.readLine();
+                                    m = br.readLine();
                                     ch.put("message", m);
                                     chat_history_list.add(ch);
                                 }
                                 usn = usernameField.getText();
-                                user_id=command.split("@")[1];
+                                user_id = command.split("@")[1];
                                 logIn.setVisible(false);
                                 is_login_success = true;
                             } else if (command.contains("loginfail")) {
                                 JOptionPane.showMessageDialog(logIn, "Username or password is wrong!");
-                            
+
                             } else if (command.contains("signupsuccess")) {
                                 usn = usernameField.getText();
                                 signUp.setVisible(false);
                                 friendlist();
                             } else if (command.contains("signupfail")) {
                                 JOptionPane.showMessageDialog(logIn, "Sign up fail!");
-                            
+
                             } else if (command.contains("sending_friend_list")) {
-                                int nofFriend = Integer. valueOf(br.readLine());
+                                int nofFriend = Integer.valueOf(br.readLine());
                                 System.out.println(nofFriend);
                                 friendTextArea.setText("");
-                                while (nofFriend > 0){
+                                while (nofFriend > 0) {
                                     friendTextArea.setText(friendTextArea.getText() + br.readLine() + '\n');
                                     nofFriend--;
                                 }
-                            
+
                             } else if (command.contains("friend_wrongusernamme")) {
                                 JOptionPane.showMessageDialog(logIn, "This user does not exist!");
-                                
+
                             } else if (command.contains("addfriendsuccess")) {
                                 cp.getPrintWriter().println("friendlist@" + usn);
 
                             } else if (command.contains("addfriend_isfriend")) {
                                 JOptionPane.showMessageDialog(logIn, "Friends already exist in the list!");
-                            
+
                             } else if (command.contains("addfriendfail")) {
                                 JOptionPane.showMessageDialog(logIn, "Add friend fail!");
-                            
+
                             } else if (command.contains("unfriendsuccess")) {
                                 cp.getPrintWriter().println("friendlist@" + usn);
 
                             } else if (command.contains("unfriend_isnotfriend")) {
                                 JOptionPane.showMessageDialog(logIn, "The friend does not exist in the list yet!");
-                            
+
                             } else if (command.contains("unfriendfail")) {
                                 JOptionPane.showMessageDialog(logIn, "Un friend fail!");
-                            
+
                                 // do sth
-                            } else if(command.contains("send_chat_avt")) {
+                            } else if (command.contains("send_chat_avt")) {
                                 Map<String, ImageIcon> temp = new HashMap<String, ImageIcon>();
-                                if(chat_partner == null) {
+                                if (chat_partner == null) {
                                     chat_partner = new HashMap<String, String>();
                                 }
                                 String m;
                                 ArrayList<String> id_list = new ArrayList<String>();
-                                while(!(m=br.readLine()).equals("end")) {
+                                while (!(m = br.readLine()).equals("end")) {
                                     id_list.add(m);
 
-                                    m=br.readLine();
+                                    m = br.readLine();
                                     chat_partner.put(id_list.get(id_list.size() - 1), m);
                                 }
-                                for(int i = 0; i < id_list.size(); i++) {
+                                for (int i = 0; i < id_list.size(); i++) {
                                     ImageIcon avt = this.receiveImage();
                                     temp.put(id_list.get(i), avt);
                                 }
                                 chat_avt = temp;
-                            } else if(command.contains("send_chat_data@")) {
+                            } else if (command.contains("send_chat_data@")) {
                                 String m;
                                 ArrayList<Map<String, String>> temp = new ArrayList<Map<String, String>>();
-                                while(!(m=br.readLine()).equals("end")) {
+                                while (!(m = br.readLine()).equals("end")) {
                                     Map<String, String> c = new HashMap<String, String>();
                                     c.put("send", m);
 
-                                    m=br.readLine();
+                                    m = br.readLine();
                                     c.put("sender_name", m);
 
-                                    m=br.readLine();
+                                    m = br.readLine();
                                     c.put("receive", m);
 
-                                    m=br.readLine();
+                                    m = br.readLine();
                                     c.put("receiver_name", m);
 
-                                    m=br.readLine();
+                                    m = br.readLine();
                                     c.put("message", m);
 
-                                    m=br.readLine();
+                                    m = br.readLine();
                                     c.put("send_at", m);
                                     temp.add(c);
                                 }
                                 current_chat_data = temp;
-                            }
-                            else if(command.contains("set_chat@")) {
+                            } else if (command.contains("set_chat@")) {
                                 String[] dataPackage = command.split("@");
-                                if(current_chat_target.equals(dataPackage[1])) {
-                                    for(int i = 0; i < chat_history_list.size(); i++) {
-                                        if((chat_history_list.get(i).get("send")).equals(dataPackage[3])) {
-                                            chatArea.append(chat_history_list.get(i).get("sender_name") + ": " + dataPackage[2] + "\n");
+                                if (current_chat_target.equals(dataPackage[1])) {
+                                    for (int i = 0; i < chat_history_list.size(); i++) {
+                                        if ((chat_history_list.get(i).get("send")).equals(dataPackage[3])) {
+                                            chatArea.append(chat_history_list.get(i).get("sender_name") + ": "
+                                                    + dataPackage[2] + "\n");
                                             break;
-                                        }
-                                        else if((chat_history_list.get(i).get("receive")).equals(dataPackage[3])) {
-                                            chatArea.append(chat_history_list.get(i).get("receiver_name") + ": " + dataPackage[2] + "\n");
+                                        } else if ((chat_history_list.get(i).get("receive")).equals(dataPackage[3])) {
+                                            chatArea.append(chat_history_list.get(i).get("receiver_name") + ": "
+                                                    + dataPackage[2] + "\n");
                                             break;
                                         }
                                     }
@@ -757,17 +901,18 @@ public class Client implements ActionListener {
                         System.err.println("Error receiver: " + ioe);
                     }
                 }
+
                 public ImageIcon receiveImage() {
                     ImageIcon result = null;
                     try {
                         DataInputStream dis = new DataInputStream(client.getInputStream());
                         int length = dis.readInt();
-                        if(length > 0) {
+                        if (length > 0) {
                             byte[] message = new byte[length];
                             dis.readFully(message, 0, message.length);
                             ByteArrayInputStream bais = new ByteArrayInputStream(message);
                             BufferedImage bi = ImageIO.read(bais);
-                            if(bi != null) {
+                            if (bi != null) {
                                 result = new ImageIcon(bi);
                             }
                         }
@@ -833,10 +978,10 @@ public class Client implements ActionListener {
 
             String msg = usernameField.getText() + "?" + passwordField.getText();
             cp.getPrintWriter().println(comStr + msg);
-            while(!is_login_success) {
+            while (!is_login_success) {
                 try {
                     Thread.sleep(100);
-                } catch(InterruptedException ie) {
+                } catch (InterruptedException ie) {
                     ie.printStackTrace();
                 }
             }
@@ -860,9 +1005,10 @@ public class Client implements ActionListener {
                 JOptionPane.showMessageDialog(signupBtn, this, "Wrong date format", portnumber);
                 return;
             }
-            
+
             String sex = maleRadioButton.isSelected() ? maleRadioButton.getText() : femaleRadioButton.getText();
-            String msg = usernameField.getText() + "?" + fullnameField.getText() + "?" + addressField.getText() + "?" + dobField.getText() + "?" + sex + "?" + emailField.getText() + "?" + passwordField.getText();
+            String msg = usernameField.getText() + "?" + fullnameField.getText() + "?" + addressField.getText() + "?"
+                    + dobField.getText() + "?" + sex + "?" + emailField.getText() + "?" + passwordField.getText();
             cp.getPrintWriter().println(comStr + msg);
         } else if (comStr.contains("friendlist@")) {
             cp.getPrintWriter().println(comStr + usn);
@@ -871,28 +1017,28 @@ public class Client implements ActionListener {
                 JOptionPane.showMessageDialog(signUp, "Input username to add");
                 return;
             }
-            
+
             String msg = usn + "?" + addfriendField.getText();
             cp.getPrintWriter().println(comStr + msg);
         } else if (comStr.contains("unfriend@")) {
             if (unfriendField.getText().equals("")) {
                 JOptionPane.showMessageDialog(signUp, "Input username to delete");
                 return;
-            }            
+            }
             String msg = usn + "?" + unfriendField.getText();
             cp.getPrintWriter().println(comStr + msg);
         } else if (comStr.contains("go_chat@")) {
             chatArea.setText("");
             String target_id = comStr.split("@")[1];
             System.out.println("Show: " + target_id);
-            for(int i = 0; i < chat_history_list.size(); i++) {
+            for (int i = 0; i < chat_history_list.size(); i++) {
                 System.out.println(chat_history_list.get(i).get("receive"));
-                if(chat_history_list.get(i).get("receive").equals(target_id)) {
+                if (chat_history_list.get(i).get("receive").equals(target_id)) {
                     chatArea.append(chat_history_list.get(i).get("send") + ": " +
-                                chat_history_list.get(i).get("message") + "\n");
+                            chat_history_list.get(i).get("message") + "\n");
                 }
             }
-        } 
+        }
 
     }
 
