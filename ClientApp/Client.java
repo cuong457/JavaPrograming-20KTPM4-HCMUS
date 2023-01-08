@@ -473,9 +473,11 @@ public class Client implements ActionListener {
         friendScrollPane.setViewportView(friendPanel);
         friendPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 
+        System.out.println("?");
         // RENDER USER BUTTON
         JButton[] fr_btn = this.generateUserPanelFromChatHis();
         this.renderPanel(friendPanel, fr_btn);
+        System.out.println("<>?");
 
         JPanel functionPanel = new JPanel();
         functionPanel.setPreferredSize(new Dimension(280, 140));
@@ -651,6 +653,7 @@ public class Client implements ActionListener {
         // chat_avt: id-image, chat_partner: id-name
         cp.getPrintWriter().println("get_chat_avt@" + user_id);
         // GET IMAGE FROM SERVER
+
         while (chat_avt == null) {
             try {
                 Thread.sleep(100);
@@ -759,6 +762,7 @@ public class Client implements ActionListener {
                     try {
                         while (true) {
                             String command = br.readLine();
+                            System.out.println(command);
                             if (command.contains("newmsg@")) {
                                 String msg = command.substring(command.lastIndexOf("@") + 1);
                                 // Gui handle
@@ -800,13 +804,15 @@ public class Client implements ActionListener {
                                 user_id = command.split("@")[1];
                                 logIn.setVisible(false);
                                 is_login_success = true;
-                            } else if (command.contains("loginfail")) {
-                                JOptionPane.showMessageDialog(logIn, "Username or password is wrong!");
+                            // } else if (command.contains("loginfail")) {
+                                // JFrame justforfail = new JFrame();
+                                // JOptionPane.showMessageDialog(justforfail, "Log in fails!");//, "Log in fail!",JOptionPane.ERROR_MESSAGE);
+
 
                             } else if (command.contains("signupsuccess")) {
                                 usn = usernameField.getText();
                                 signUp.setVisible(false);
-                                friendlist();
+                                login();
                             } else if (command.contains("signupfail")) {
                                 JOptionPane.showMessageDialog(logIn, "Sign up fail!");
 
@@ -847,7 +853,7 @@ public class Client implements ActionListener {
                                 JOptionPane.showMessageDialog(logIn, "Un friend fail!");
 
                                 // do sth
-                            } else if (command.contains("send_chat_avt")) {
+                            } else if (command.contains("send_chat_avt@")) {
                                 Map<String, ImageIcon> temp = new HashMap<String, ImageIcon>();
                                 if (chat_partner == null) {
                                     chat_partner = new HashMap<String, String>();
@@ -905,6 +911,8 @@ public class Client implements ActionListener {
                                     }
                                 }
                             }
+                            
+                            // System.out.println("co22nc");
                         }
                     } catch (IOException ioe) {
                         System.err.println("Error receiver: " + ioe);

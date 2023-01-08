@@ -360,8 +360,9 @@ public class Server {
                                     pw.println(rs.getString("message"));
                                 }
                                 pw.println("end");
-                            } else
+                            } else{
                                 pw.println("loginfail");
+                            }
                         } catch (Exception e) {
                             System.err.println("Error: " + e);
                         }
