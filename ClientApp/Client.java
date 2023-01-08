@@ -40,7 +40,7 @@ public class Client implements ActionListener {
     ArrayList<Map<String, String>> chat_history_list = new ArrayList<Map<String, String>>();
     ArrayList<Map<String, String>> current_chat_data = new ArrayList<Map<String, String>>();
     ArrayList<Map<String, ImageIcon>> friend_avt = new ArrayList<Map<String, ImageIcon>>();
-    Map<String, ImageIcon> chat_avt = new HashMap<String, ImageIcon>();
+    Map<String, ImageIcon> chat_avt = null;
     Map<String, String> chat_partner = new HashMap<String, String>();
     JTextArea chatArea;
 
@@ -347,6 +347,7 @@ public class Client implements ActionListener {
 		JButton createGroupButton = new JButton("Tạo nhóm");
 		createGroupButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+
 			}
 		});
 		createGroupButton.setBackground(new Color(0, 255, 255));
@@ -380,7 +381,6 @@ public class Client implements ActionListener {
 		panel_5.add(scrollPane_1);
 
 		currentChatFriend = new JLabel("");
-		currentChatFriend.setIcon(new ImageIcon("E:\\java - dh\\final project\\ChatPrivateUI\\src\\user2.png"));
 		currentChatFriend.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		currentChatFriend.setPreferredSize(new Dimension(43, 60));
 		panel_5.add(currentChatFriend, BorderLayout.NORTH);
@@ -418,6 +418,7 @@ public class Client implements ActionListener {
 		deleteHistoryButton.setBounds(23, 20, 137, 31);
 		deleteHistoryButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+
 			}
 		});
 		panel_6.setLayout(null);
@@ -455,97 +456,6 @@ public class Client implements ActionListener {
 
         // SET MAIN FRAME TRUE
         friendList.setVisible(true);
-        // headerLabel = new JLabel("Friend");
-        // usernameLabel = new JLabel("Your username");
-        // addfriendLabel = new JLabel("Add friend by username");
-        // unfriendLabel = new JLabel("Unfriend by username");
-
-        // usernameField = new JTextField(15);
-        // addfriendField = new JTextField(15);
-        // unfriendField = new JTextField(15);
-
-        // addfriendBtn = new JButton("Add friend");
-        // unfriendBtn = new JButton("Unfriend");
-
-        // friendTextArea = new JTextArea(16,16);
-        // friendScrollPane = new JScrollPane(friendTextArea);
-
-        // friendStrList = new ArrayList<String>();
-
-        // //set font
-        // headerLabel.setFont(new Font("Arial", Font.PLAIN, 28));
-        // usernameLabel.setFont(new Font("Arial", Font.PLAIN, 20));
-        // addfriendLabel.setFont(new Font("Arial", Font.PLAIN, 20));
-        // unfriendLabel.setFont(new Font("Arial", Font.PLAIN, 20));
-        // usernameField.setFont(new Font("Arial", Font.PLAIN, 18));
-        // addfriendField.setFont(new Font("Arial", Font.PLAIN, 18));
-        // unfriendField.setFont(new Font("Arial", Font.PLAIN, 17));
-        // addfriendBtn.setFont(new Font("Arial", Font.BOLD, 17));
-        // unfriendBtn.setFont(new Font("Arial", Font.BOLD, 18));
-        // friendTextArea.setFont(new Font("Arial", Font.PLAIN, 18));
-
-        // //add action
-        // // showAction();
-        // cp.getPrintWriter().println("friendlist@" + usn);
-        
-        // addfriendBtn.setActionCommand("addfriend@");
-        // addfriendBtn.addActionListener(this);
-        
-        // unfriendBtn.setActionCommand("unfriend@");
-        // unfriendBtn.addActionListener(this);
-
-        // //add to frame
-        // friendList.add(headerLabel);
-        // friendList.add(usernameLabel);
-        // friendList.add(addfriendLabel);
-        // friendList.add(unfriendLabel);
-        // friendList.add(usernameField);
-        // friendList.add(addfriendField);
-        // friendList.add(unfriendField);
-        // friendList.add(addfriendBtn);
-        // friendList.add(unfriendBtn);
-        // friendList.add(friendTextArea);
-        // friendList.add(friendScrollPane);
-        
-        // //set color
-        // addfriendBtn.setBackground(new Color(103,201,250));
-        // addfriendBtn.setOpaque(true);
-
-        // unfriendBtn.setBackground(new Color(255,84,84));
-        // unfriendBtn.setOpaque(true);
-
-        // friendTextArea.setBackground(new Color(246, 250, 142));
-        // friendTextArea.setOpaque(true);
-
-        // //set scrollpane
-        // friendScrollPane.setViewportView(friendTextArea);
-
-        // //set size and location
-        // headerLabel.setBounds(30, 20, 300, 60);
-        // usernameLabel.setBounds(360, 30, 300, 40);
-        // addfriendLabel.setBounds(360, 30 + 50*3, 300, 40);
-        // unfriendLabel.setBounds(360, 30 + 50*7, 300, 40);
-
-        // usernameField.setBounds(360, 30 + 50, 300, 40);
-        // addfriendField.setBounds(360, 30 + 50*4, 300, 40);
-        // unfriendField.setBounds(360, 30 + 50*8, 300, 40);
-
-        // addfriendBtn.setBounds(360, 30 + 50*5, 300, 40);
-        // unfriendBtn.setBounds(360, 30 + 50*9, 300, 40);
-        
-        // friendScrollPane.setBounds(30 , 20 + 60, 300, 560);
-
-        // friendTextArea.setBounds(30, 20 + 60, 300, 560);
-
-        // //set text field enabled
-        // usernameField.setEnabled(false);
-        // friendTextArea.setEditable(false);
-
-        // //just for username of current user
-        // usernameField.setText(usn);
-
-        // friendList.setVisible(true);
-
     }
 
     void renderCurrentUser(JPanel root, String id) {
@@ -590,10 +500,9 @@ public class Client implements ActionListener {
 
     JButton[] generateUserPanelFromChatHis() {
         // chat_avt: id-image, chat_partner: id-name
-        chat_avt = new HashMap<String, ImageIcon>();
         cp.getPrintWriter().println("get_chat_avt@" + user_id);
         // GET IMAGE FROM SERVER
-        while(chat_avt.size() <= 0) {
+        while(chat_avt == null) {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
@@ -654,6 +563,7 @@ public class Client implements ActionListener {
                         if((k).equals(current_chat_target)) {
                             System.out.println(chat_partner.get(k));
                             currentChatFriend.setText(chat_partner.get(k));
+                            currentChatFriend.setIcon(new ImageIcon(ScaleImage(chat_avt.get(k).getImage(), 50, 50)));
                             friendList.revalidate();
                             friendList.repaint();
                             break;
